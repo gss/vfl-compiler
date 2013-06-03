@@ -1,0 +1,9 @@
+{
+  "name": "vfl-compiler",
+  "description": "Visual Format Language compiler",
+  "version": "0.0.1",
+  "scripts": [
+    "lib/vfl-compiler.js"
+  ],
+  "main": "lib/vfl-compiler.js"
+}
