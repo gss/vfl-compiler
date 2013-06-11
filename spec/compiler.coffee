@@ -10,7 +10,7 @@ describe 'VFL compiler', ->
     
   describe '@horizontal [#b1][#b2]; // simple connection ', ->
     source = """
-    @-gss-horizontal [#b1][#b2];
+            @horizontal [#b1][#b2];
     """
     result = null
     expect = 
@@ -30,7 +30,7 @@ describe 'VFL compiler', ->
   
   describe '@vertical [#b1]-[#b2]-[#b3]-[#b4]-[#b5]; // connection chain with implicit hgaps ', ->
     source = """
-    @-gss-vertical [#b1]-[#b2]-[#b3];
+            @vertical [#b1]-[#b2]-[#b3];
     """
     result = null
     expect = 
@@ -44,11 +44,12 @@ describe 'VFL compiler', ->
         ]
       ]              
     it '/ the result should match the expectation', ->
+      result = parser.parse source 
       chai.expect(result).to.eql expect
       
-  describe '@horizontal [#b1]-100-[#b2]-[#b3] gap(1); // explicit gaps ', ->
+  describe '@horizontal [#b1]-100-[#b2]-8-[#b3]; // explicit gaps ', ->
     source = """
-    @-gss-h [#b1]-100-[#b2]-[#b3] gap(1);
+            @horizontal [#b1]-100-[#b2]-8-[#b3];
     """
     result = null
     expect = 
@@ -56,15 +57,16 @@ describe 'VFL compiler', ->
         [
           'ccss'
           "#b1[right] + 100 == #b2[left]"
-          "#b2[right] + 1 == #b3[left]"
+          "#b2[right] + 8 == #b3[left]"
         ]
       ]            
     it '/ the result should match the expectation', ->
+      result = parser.parse source 
       chai.expect(result).to.eql expect
   
   describe '@horizontal [#b1]~[#b2]; // simple cushion ', ->
     source = """
-    @-gss-h [#b1]~[#b2];
+            @horizontal [#b1]~[#b2];
     """
     result = null
     expect = 
@@ -75,11 +77,12 @@ describe 'VFL compiler', ->
         ]
       ]            
     it '/ the result should match the expectation', ->
+      result = parser.parse source 
       chai.expect(result).to.eql expect
   
   describe '@horizontal [#b1]~-~[#b2]~100~[#b3]; // cushions w/ gaps ', ->
     source = """
-    @-gss-h [#b1]~-~[#b2]~100~[#b3];
+            @horizontal [#b1]~-~[#b2]~100~[#b3];
     """
     result = null
     expect = 
@@ -91,5 +94,81 @@ describe 'VFL compiler', ->
         ]
       ]            
     it '/ the result should match the expectation', ->
+      result = parser.parse source 
       chai.expect(result).to.eql expect
+  
+  describe '@vertical |[#sub]| in(#parent); // flush with super view', ->
+    source = """
+            @vertical |[#sub]| in(#parent);
+    """
+    result = null
+    expect = 
+      [
+        [
+          'ccss'
+          '#parent[top] == #sub[top]'
+          '#sub[bottom] == #parent[bottom]'          
+        ]
+      ]            
+      
+    it '/ the result should match the expectation', ->
+      result = parser.parse source 
+      chai.expect(result).to.eql expect
+  
+  describe '@horizontal |-[#sub1]-[#sub2]-| in(#parent); // super view with standard gaps', ->
+    source = """
+            @horizontal |-[#sub1]-[#sub2]-| in(#parent);
+    """
+    result = null
+    expect = 
+      [
+        [
+          'ccss'
+          '#parent[left] + [hgap] == #sub1[left]'
+          '#sub1[right] + [hgap] == #sub2[left]'          
+          '#sub2[right] + [hgap] == #parent[right]'          
+        ]
+      ]            
+      
+    it '/ the result should match the expectation', ->
+      result = parser.parse source 
+      chai.expect(result).to.eql expect
+  
+  describe '@horizontal |-1-[#sub]-2-| in(#parent); // super view with explicit gaps', ->
+    source = """
+            @horizontal |-1-[#sub]-2-| in(#parent);
+    """
+    result = null
+    expect = 
+      [
+        [
+          'ccss'
+          '#parent[left] + 1 == #sub[left]'
+          '#sub[right] + 2 == #parent[right]'          
+        ]
+      ]            
+      
+    it '/ the result should match the expectation', ->
+      result = parser.parse source 
+      chai.expect(result).to.eql expect
+  
+  describe '@horizontal |~[#sub]~2~| in(#parent); // super view with cushions', ->
+    source = """
+            @horizontal |~[#sub]~2~| in(#parent);
+    """
+    result = null
+    expect = 
+      [
+        [
+          'ccss'
+          '#parent[left] <= #sub[left]'
+          '#sub[right] + 2 <= #parent[right]'          
+        ]
+      ]            
+      
+    it '/ the result should match the expectation', ->
+      result = parser.parse source 
+      chai.expect(result).to.eql expect
+      
+    
 
