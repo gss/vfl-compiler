@@ -6,9 +6,11 @@ This library compiles GSS flavored [Visual Format Language](http://developer.app
 
 # API
 
-#### Horizontal layout with standard gap
+> Below examples omit the vendor prefix.  so `@horizontal` is shorthand for `@-gss-horizontal`
 
-`@h [#button]-[#input]`
+#### Horizontal connections with standard gap
+
+`@horizontal [#button]-[#input];`
 
 ![GSS flavored VFL: standard gap](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/standardSpace.png)
 
@@ -18,45 +20,57 @@ compiles to
 
 #### Vertical Layout with explicit gap
 
-`@v [#topField]-10-[#bottomField]`
+`@vertical [#topField]-10-[#bottomField]`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/verticalLayout.png)
 
 #### Flush Views
 
-`@h [#maroonView][#oceanView]`
+`@horizontal [#maroonView][#oceanView];`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/flushViews.png)
 
 #### Width Constraint
 
-`@h [#button(>=50)]`
+`@horizontal [#button(>=50)];`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/widthConstraint.png)
 
 #### Multiple Predicates
 
-`@h [#flexibleButton(>=70,<=100)]`
+`@horizontal [#flexibleButton(>=70,<=100)];`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/multiplePredicates.png)
 
 ### Connection to Superview
 
-`@h |-50-[#message]-50-| in(#panel)`
+`@horizontal |-50-[#message]-50-| in(#panel);`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/connectionToSuperview.png)
 
 #### Equal Widths
 
-`@h [#button1(==#button2)]`
+`@horizontal [#button1(==#button2)];`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/equalWidths.png)
 
 #### A Complete Line of Layout
 
-`@h |-[#find]-[#findNext]-[#findField(>=20)]-|`
+`@horizontal |-[#find]-[#findNext]-[#findField(>=20)]-|;`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/completeLayout.png)
+
+#### Cushion connections
+
+Cushion connections, those with `~`, are essentially single dimensional non-overlapping constraints.
+
+To ensure `#panelA`s right edge doesn't go passed `#panelB`s left edge:
+
+`@horizontal [#panelA]~[#panelB];`
+
+compiles tp
+
+`#panelA[right] <= #panelB[left]`
 
 ----------------------
 
