@@ -8,7 +8,7 @@ This library compiles GSS flavored [Visual Format Language](http://developer.app
 
 > Below examples omit the vendor prefix., so `@horizontal` is lazy-hand for `@-gss-horizontal`
 
-#### Horizontal connections with standard gap
+#### Horizontal Connections with Gap
 
 `@horizontal [#button]-[#input];`
 
@@ -16,24 +16,25 @@ to explicitly define the gap:
 
 `@horizontal [#button]-8-[#input];`
 
-which compiles to
+which is equivalent to the CCSS statement:
 
 `#button[right] + 8 == #input[left]`
 
 ![GSS flavored VFL: standard gap](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/standardSpace.png)
 
-
-#### Vertical Layout with explicit gap
-
-`@vertical [#topField]-10-[#bottomField]`
-
-![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/verticalLayout.png)
-
-#### Flush Views
+#### Flush Connection
 
 `@horizontal [#maroonView][#oceanView];`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/flushViews.png)
+
+#### Vertical Layout
+
+Use `vertical` instead of `horizontal`.
+
+`@vertical [#topField]-[#bottomField]`
+
+![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/verticalLayout.png)
 
 #### Width Constraint
 
@@ -76,6 +77,19 @@ To ensure `#panelA`s right edge doesn't go passed `#panelB`s left edge:
 compiles to
 
 `#panelA[right] <= #panelB[left]`
+
+#### Constraining the Standard Gap
+
+To set and/or constrain the gap used in the layout connections, use the `hgap` or `vgap` variables in regular GSS.  
+
+For example, to define a layout where the horizontal gap prefers to be 10% of a button's width, but never below 100px:
+
+```
+[hgap] == #b1[width]/10 !weak;
+[hgap] >= 100 !required;
+
+@horizontal [#b1]-[#b2]-[#b3]-[#b4];
+```
 
 ----------------------
 
