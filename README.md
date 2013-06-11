@@ -8,7 +8,9 @@ This library compiles GSS flavored [Visual Format Language](http://developer.app
 
 > Below examples omit the vendor prefix., so `@horizontal` is lazy-hand for `@-gss-horizontal`
 
-#### Horizontal Connections with Gap
+#### Horizontal Connections with a Gap
+
+This examples uses a standard horizontal gap:
 
 `@horizontal [#button]-[#input];`
 
@@ -90,6 +92,8 @@ For example, to define a layout where the horizontal gap prefers to be 10% of a 
 
 @horizontal [#b1]-[#b2]-[#b3]-[#b4];
 ```
+
+This is where the powers of CCSS and VFL come together for pure awesome.
 
 ----------------------
 
