@@ -6,7 +6,7 @@ This library compiles GSS flavored [Visual Format Language](http://developer.app
 
 # API
 
-### Horizontal layout with standard gap
+#### Horizontal layout with standard gap
 
 `@h [#button]-[#input]`
 
@@ -16,23 +16,25 @@ compiles to
 
 `#button[right] + [hgap] == #input[left]`
 
-### Vertical Layout with explicit gap
+#### Vertical Layout with explicit gap
+
+`@v [topField]-10-[bottomField]`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/verticalLayout.png)
 
-### Flush Views
+#### Flush Views
 
 `@h [maroonView][oceanView]`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/flushViews.png)
 
-### Width Constraint
+#### Width Constraint
 
 `@h [#button(>=50)]`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/widthConstraint.png)
 
-### Multiple Predicates
+#### Multiple Predicates
 
 `@h [#flexibleButton(>=70,<=100)]`
 
@@ -44,13 +46,13 @@ compiles to
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/connectionToSuperview.png)
 
-### Equal Widths
+#### Equal Widths
 
 `@h [#button1(==#button2)]`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/equalWidths.png)
 
-### A Complete Line of Layout
+#### A Complete Line of Layout
 
 `@h |-[#find]-[#findNext]-[#findField(>=20)]-|`
 
