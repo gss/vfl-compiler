@@ -1,0 +1,154 @@
+{
+  var p, parser, flatten, cs, $s, vars, _varsCache; 
+
+  p = parser = this;
+
+  cs = parser.cs = [];
+  parser.addC    = function (c) {
+    cs.push(c);
+  };
+
+  parser.getResults = function () {
+    return {
+      "ccss": this.cs      
+    }
+  }
+
+}
+
+start
+  = __ statements:(Statement*) __ { return (parser.getResults()); }
+
+Statement
+  = exp:LinearExpression EOS __ { return exp; }
+
+LinearExpression
+  = Dimension __ head:View
+    tail:(__ Connection? __ View)*
+    __ s:StrengthAndWeight? {
+      var connection, view2, result;
+      result = head;
+      if (s.length === 0) {s = [];}
+      for (var i = 0; i < tail.length; i++) {        
+        connection = tail[i][1];
+        view2 = tail[i][3];
+        result = [
+          //"c",
+          connection,
+          result,
+          view2
+        ];
+        parser.addC([
+          //"c",
+          connection,
+          head,
+          view2
+        ].concat(s));
+        head = view2;
+      }
+      return result;
+    }
+
+Dimension
+  = ("@horizontal" / "@-gss-horizontal" / "@-gss-h") {return 0}
+  / ("@vertical" / "@-gss-vertical" / "@-gss-v") {return 1}
+
+View
+  = "[" name:NameChars+ "]"  {return name.join("")}
+  // super view...
+  // errorr 
+  
+Connection
+  = "-" gap:NameChars "-"  {return gap.join("")}
+  / "-"
+  / "~" gap:NameChars "~"  {return gap.join("")}
+  / "~"
+
+  
+StrengthAndWeight
+  = "!" s:Strength w:Weight?  {
+      if (w.length === 0) {return [s];}
+      return [s,w];
+    }
+  / "!" .? {return parser.error("Invalid Strength",line,column)}
+
+Weight
+  = ":" w:[0-9]+   {return Number(w.join(""))}
+  / ":" . {return parser.error("Invalid Weight",line,column)}
+
+Strength
+  = ("require"  / "REQUIRE"  / "Require")  {return "require"}
+  / ("strong"   / "STRONG"   / "Strong")   {return "strong"}
+  / ("medium"   / "MEDIUM"   / "Medium")   {return "medium"}
+  / ("weak"     / "WEAK"     / "Weak")     {return "weak"}
+  / ("required" / "REQUIRED" / "Required") {return "require"}
+
+  
+
+NameChars
+  = [a-zA-Z0-9#.\-_$]
+
+NameCharsWithSpace
+  = NameChars / " "
+
+Literal
+  = val:(Real / Integer) {
+    return [ "number",
+      val
+    ]
+  }
+
+Integer
+  = digits:[0-9]+ {
+    return parseInt(digits.join(""));
+  }
+
+Real
+  = digits:(Integer "." Integer) {
+    return parseFloat(digits.join(""));
+  }
+
+SignedInteger
+  = [-+]? [0-9]+
+
+SourceCharacter
+  = .
+
+WhiteSpace "whitespace"
+  = [\t\v\f \u00A0\uFEFF]
+
+LineTerminator
+  = [\n\r\u2028\u2029]
+
+LineTerminatorSequence "end of line"
+  = "\n"
+  / "\r\n"
+  / "\r"
+  / "\u2028" // line separator
+  / "\u2029" // paragraph separator
+
+EOS
+  = __ ";"
+  / _ LineTerminatorSequence
+  / __ EOF
+
+EOF
+  = !.
+
+Comment "comment"
+  = MultiLineComment
+  / SingleLineComment
+
+MultiLineComment
+  = "/*" (!"*/" SourceCharacter)* "*/"
+
+MultiLineCommentNoLineTerminator
+  = "/*" (!("*/" / LineTerminator) SourceCharacter)* "*/"
+
+SingleLineComment
+  = "//" (!LineTerminator SourceCharacter)* (LineTerminator / EOF)
+_
+  = (WhiteSpace / MultiLineCommentNoLineTerminator / SingleLineComment)*
+
+__
+  = (WhiteSpace / LineTerminatorSequence / Comment)*
