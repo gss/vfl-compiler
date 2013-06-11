@@ -47,7 +47,7 @@ which compiles to
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/multiplePredicates.png)
 
-### Connection to Superview
+#### Connection to Superview
 
 `@horizontal |-50-[#message]-50-| in(#panel);`
 
@@ -65,7 +65,7 @@ which compiles to
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/completeLayout.png)
 
-#### Cushion connections
+#### Cushion Connections
 
 Cushion connections, those with `~`, are essentially single dimensional non-overlapping constraints.
 
