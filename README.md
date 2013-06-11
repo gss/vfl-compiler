@@ -12,11 +12,15 @@ This library compiles Grid flavored [Visual Format Language](http://developer.ap
 
 This examples uses a standard horizontal gap:
 
-`@horizontal [#button]-[#input];`
+```
+@horizontal [#button]-[#input];
+```
 
 to explicitly define the gap:
 
-`@horizontal [#button]-8-[#input];`
+```
+@horizontal [#button]-8-[#input];
+```
 
 which is equivalent to the CCSS statement:
 
@@ -26,7 +30,9 @@ which is equivalent to the CCSS statement:
 
 #### Flush Connection
 
-`@horizontal [#maroonView][#oceanView];`
+```
+@horizontal [#maroonView][#oceanView];
+```
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/flushViews.png)
 
@@ -34,37 +40,49 @@ which is equivalent to the CCSS statement:
 
 Use `vertical` instead of `horizontal`.
 
-`@vertical [#topField]-[#bottomField]`
+```
+@vertical [#topField]-[#bottomField]
+```
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/verticalLayout.png)
 
 #### Width Constraint
 
-`@horizontal [#button(>=50)];`
+```
+@horizontal [#button(>=50)];
+```
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/widthConstraint.png)
 
 #### Multiple Predicates
 
-`@horizontal [#flexibleButton(>=70,<=100)];`
+```
+@horizontal [#flexibleButton(>=70,<=100)];
+```
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/multiplePredicates.png)
 
 #### Connection to Superview
 
-`@horizontal |-50-[#purple]-50-| in(#box);`
+```
+@horizontal |-50-[#purple]-50-| in(#box);
+```
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/connectionToSuperview.png)
 
 #### Equal Widths
 
-`@horizontal [#button1(==#button2)];`
+```
+@horizontal [#button1(==#button2)];
+```
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/equalWidths.png)
 
 #### A Complete Line of Layout
 
-`@horizontal |-[#find]-[#findNext]-[#findField(>=20)]-|;`
+```
+@horizontal |-[#find]-[#findNext]-[#findField(>=20)]-|;
+```
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/completeLayout.png)
 
@@ -74,11 +92,25 @@ Cushion connections, those with `~`, are essentially single dimensional non-over
 
 To ensure `#panelA`s right edge doesn't go passed `#panelB`s left edge:
 
-`@horizontal [#panelA]~[#panelB];`
+```
+@horizontal [#panelA]~[#panelB];
+```
 
 which is equivalent to the following CCSS:
 
 `#panelA[right] <= #panelB[left]`
+
+To cushion by the standard gap:
+
+```
+@horizontal [#panelA]~-~[#panelB];
+```
+
+To cushion by an explicit gap:
+
+```
+@horizontal [#panelA]~8~[#panelB];
+```
 
 #### Constraining the Standard Gap
 
