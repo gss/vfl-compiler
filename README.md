@@ -6,17 +6,22 @@ This library compiles GSS flavored [Visual Format Language](http://developer.app
 
 # API
 
-> Below examples omit the vendor prefix.  so `@horizontal` is shorthand for `@-gss-horizontal`
+> Below examples omit the vendor prefix., so `@horizontal` is lazy-hand for `@-gss-horizontal`
 
 #### Horizontal connections with standard gap
 
 `@horizontal [#button]-[#input];`
 
+to explicitly define the gap:
+
+`@horizontal [#button]-8-[#input];`
+
+which compiles to
+
+`#button[right] + 8 == #input[left]`
+
 ![GSS flavored VFL: standard gap](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/standardSpace.png)
 
-compiles to
-
-`#button[right] + [hgap] == #input[left]`
 
 #### Vertical Layout with explicit gap
 
@@ -68,7 +73,7 @@ To ensure `#panelA`s right edge doesn't go passed `#panelB`s left edge:
 
 `@horizontal [#panelA]~[#panelB];`
 
-compiles tp
+compiles to
 
 `#panelA[right] <= #panelB[left]`
 
