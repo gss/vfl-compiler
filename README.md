@@ -1,7 +1,7 @@
 VFL Compiler [![Build Status](https://travis-ci.org/the-gss/vfl-compiler.png?branch=master)](https://travis-ci.org/the-gss/vfl-compiler)
 =============
 
-This library compiles Grid flavored [Visual Format Language](http://developer.apple.com/library/ios/#documentation/UserExperience/Conceptual/AutolayoutPG/Articles/formatLanguage.html) from [Cocoa Autolayout](http://developer.apple.com/library/ios/#documentation/UserExperience/Conceptual/AutolayoutPG/Articles/formatLanguage.html), into Grid flavored [CCSS](http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.101.4819) statements.  
+This library compiles Grid flavored [Visual Format Language](http://developer.apple.com/library/ios/#documentation/UserExperience/Conceptual/AutolayoutPG/Articles/formatLanguage.html) from [Cocoa Autolayout](http://developer.apple.com/library/ios/#documentation/UserExperience/Conceptual/AutolayoutPG/Articles/formatLanguage.html), into Grid flavored [CCSS](http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.101.4819) statements.
 
 
 # API
@@ -52,7 +52,7 @@ Use `vertical` instead of `horizontal`.
 
 #### Connection to Superview
 
-`@horizontal |-50-[#message]-50-| in(#panel);`
+`@horizontal |-50-[#purple]-50-| in(#box);`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/connectionToSuperview.png)
 
@@ -76,7 +76,7 @@ To ensure `#panelA`s right edge doesn't go passed `#panelB`s left edge:
 
 `@horizontal [#panelA]~[#panelB];`
 
-compiles to
+which is equivalent to the following CCSS:
 
 `#panelA[right] <= #panelB[left]`
 
