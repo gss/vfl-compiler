@@ -18,13 +18,13 @@ compiles to
 
 #### Vertical Layout with explicit gap
 
-`@v [topField]-10-[bottomField]`
+`@v [#topField]-10-[#bottomField]`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/verticalLayout.png)
 
 #### Flush Views
 
-`@h [maroonView][oceanView]`
+`@h [#maroonView][#oceanView]`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/flushViews.png)
 
