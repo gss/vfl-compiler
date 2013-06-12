@@ -10,6 +10,10 @@ module.exports = ->
         outputFile: 'lib/vfl-compiler.js'
 
     # Build the browser Component
+    component:
+      install:
+        options:
+          action: 'install'
     component_build:
       'vfl-compiler':
         output: './browser/'
@@ -27,7 +31,7 @@ module.exports = ->
 
     # Automated recompilation and testing when developing
     watch:
-      files: ['spec/*.coffee', 'grammar/*.peg']
+      files: ['spec/*.coffee', 'grammar/*.peg', 'lib/compiler.js']
       tasks: ['test']
 
     # BDD tests on Node.js
@@ -51,6 +55,7 @@ module.exports = ->
       all: ['spec/runner.html']
 
   # Grunt plugins used for building
+  @loadNpmTasks 'grunt-component'
   @loadNpmTasks 'grunt-peg'
   @loadNpmTasks 'grunt-component-build'
   @loadNpmTasks 'grunt-contrib-uglify'
@@ -61,6 +66,6 @@ module.exports = ->
   @loadNpmTasks 'grunt-mocha-phantomjs'
   @loadNpmTasks 'grunt-contrib-watch'
 
-  @registerTask 'build', ['peg', 'component_build', 'uglify']
+  @registerTask 'build', ['peg', 'component', 'component_build', 'uglify']
   @registerTask 'test', ['build', 'coffee', 'cafemocha', 'mocha_phantomjs']
   @registerTask 'default', ['build']
