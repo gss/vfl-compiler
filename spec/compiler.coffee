@@ -149,24 +149,53 @@ describe 'Compiler', ->
   describe '/* Predicates */', ->
     
     parse """
-            @horizontal [#sub(==100)]; // single predicate
+            @vertical [#sub(==100)]; // single predicate
           """
         ,
           [
             [
               'ccss'
-              '#sub[width] == 100'                  
+              '#sub[height] == 100'                  
             ]
           ]
     
     parse """
-            @horizontal [#sub(==100)]; // single predicate
+            @vertical [#box(<=100!required,>=30!strong100)]; // multiple predicates w/ strength & weight
           """
         ,
           [
             [
               'ccss'
-              '#sub[width] == 100'                  
+              '#box[height] <= 100 !required'
+              '#box[height] >= 30 !strong100'                  
+            ]
+          ]
+    
+    parse """
+            @horizontal [#b1(<=100)][#b2(==#b1)]; // connected predicates
+          """
+        ,
+          [
+            [
+              'ccss'
+              '#b1[width] <= 100'
+              '#b2[width] == #b1[width]'
+              '#b1[right] == #b2[left]'
+            ]
+          ]
+          
+    parse """
+            @horizontal [#b1(<=100, ==#b99!99)][#b2(>= #b1 *2  !weak10, <=3!required)] !medium200; // multiple, connected predicates w/ strength & weight
+          """
+        ,
+          [
+            [
+              'ccss'
+              '#b1[width] <= 100'
+              '#b1[width] <= #b99[width] !99'
+              '#b2[width] >= #b1[width] * 2 !weak10'
+              '#b2[width] <= 3 !required'
+              '#b1[right] == #b2[left] !medium200'
             ]
           ]
 
