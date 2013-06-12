@@ -23,24 +23,24 @@ describe 'VFL compiler', ->
               
     it 'should be able to produce a result', ->
       result = parser.parse source 
-      chai.expect(result).to.be.an 'object'
+      chai.expect(result).to.be.an 'array'
       
     it '/ the result should match the expectation', ->
       chai.expect(result).to.eql expect
   
   describe '@vertical [#b1]-[#b2]-[#b3]-[#b4]-[#b5]; // connection chain with implicit hgaps ', ->
     source = """
-            @vertical [#b1]-[#b2]-[#b3];
+            @vertical [#b1]-[#b2]-[#b3]-[#b4]-[#b5];
     """
     result = null
     expect = 
       [
         [
           'ccss'
-          "#b1[bottom] + [hgap] == #b2[top]"
-          "#b2[bottom] + [hgap] == #b3[top]"    
-          "#b3[bottom] + [hgap] == #b4[top]"    
-          "#b4[bottom] + [hgap] == #b5[top]"    
+          "#b1[bottom] + [vgap] == #b2[top]"
+          "#b2[bottom] + [vgap] == #b3[top]"    
+          "#b3[bottom] + [vgap] == #b4[top]"    
+          "#b4[bottom] + [vgap] == #b5[top]"    
         ]
       ]              
     it '/ the result should match the expectation', ->

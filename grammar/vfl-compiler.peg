@@ -1,17 +1,75 @@
 {
-  var p, parser, flatten, cs, $s, vars, _varsCache; 
+  var p, parser, cs, leftVarNames, superLeftVarNames, rightVarNames, superRightVarNames, standardGapNames, getSuperViewName, getGapString; 
 
   p = parser = this;
 
   cs = parser.cs = [];
-  parser.addC    = function (c) {
+
+  parser.addC = function (c) {
     cs.push(c);
   };
+  
+  leftVarNames = ["right", "bottom"];
+  superLeftVarNames = ["left", "top"];
+  rightVarNames = ["left", "top"];
+  superRightVarNames = ["right", "bottom"];
+
+  getSuperViewName = function (o) {
+    if (o.in === null) {return "::this";}
+    else {return o.in;}
+  }
+
+  parser.getLeftVar = function (view, dimension, o) {
+    var varName;
+    
+    if (view === "|") {
+      view = getSuperViewName(o);
+      varName = superLeftVarNames[dimension];
+    }
+    else {
+      varName = leftVarNames[dimension]
+      
+    }
+    return view + "[" + varName + "]";
+  }
+  
+  parser.getRightVar = function (view, dimension, o) {
+    var varName;
+    
+    if (view === "|") {
+      view = getSuperViewName(o);
+      varName = superRightVarNames[dimension];
+    }
+    else {
+      varName = rightVarNames[dimension];
+      
+    }
+    return view + "[" + varName + "]";
+  }
+  
+  standardGapNames = ["[hgap]", "[vgap]"];
+  
+  getGapString = function (g,d) {
+    if (g === undefined) {return "";}
+    if (g === "__STANDARD__") {g = standardGapNames[d];}
+    return "+ " + g
+  }
+
+  
+  parser.getConnectionString = function (c,d) {
+    return (getGapString(c.gap,d) + " " + c.op).trim()
+  }
 
   parser.getResults = function () {
-    return {
-      "ccss": this.cs      
-    }
+    return [
+      ["ccss"].concat(this.cs)
+    ]
+  }
+
+  parser.error = function (m,l,c) {
+    if (!!l && !!c) {m = m+ " {line:" + l + ", col:" + c + "}"} 
+    console.error(m);
+    return m;
   }
 
 }
@@ -20,15 +78,14 @@ start
   = __ statements:(Statement*) __ { return (parser.getResults()); }
 
 Statement
-  = exp:LinearExpression EOS __ { return exp; }
+  = exp:VFLStatement EOS __ { return exp; }
 
-LinearExpression
-  = Dimension __ head:View
-    tail:(__ Connection? __ View)*
-    __ s:StrengthAndWeight? {
-      var connection, view2, result;
+VFLStatement
+  = d:Dimension __ head:View
+    tail:(__ Connection? __ View)* __ o:Options?
+    __ s:StrengthAndWeight?         {
+      var connection, view2, result, ccss;
       result = head;
-      if (s.length === 0) {s = [];}
       for (var i = 0; i < tail.length; i++) {        
         connection = tail[i][1];
         view2 = tail[i][3];
@@ -38,43 +95,57 @@ LinearExpression
           result,
           view2
         ];
-        parser.addC([
-          //"c",
-          connection,
-          head,
-          view2
-        ].concat(s));
+        ccss = parser.getLeftVar(head, d, o) + " " + 
+          parser.getConnectionString(connection, d) + " " +
+          parser.getRightVar(view2, d, o) + " " +
+          s
+        parser.addC(
+          ccss.trim()
+        );
         head = view2;
       }
-      return result;
+      return "VFL Statement";
     }
 
 Dimension
   = ("@horizontal" / "@-gss-horizontal" / "@-gss-h") {return 0}
   / ("@vertical" / "@-gss-vertical" / "@-gss-v") {return 1}
 
+
+Options
+  = os:Option+  {
+    var obj = {};
+    for (var i = 0; i < os.length; i++) {    
+      obj[os[i].key] = os[i].value;
+    }
+    return obj;
+  }
+
+Option
+  = __ key:NameChars+ "(" value:NameChars+ ")" {return {key:key.join(''), value:value.join('')}}
+
 View
   = "[" name:NameChars+ "]"  {return name.join("")}
+  / "|"
   // super view...
   // errorr 
   
 Connection
-  = "-" gap:NameChars "-"  {return gap.join("")}
-  / "-"
-  / "~" gap:NameChars "~"  {return gap.join("")}
-  / "~"
+  = "-" gap:GapChars+ "-"  {return {op:"==",gap:gap.join("")};}
+  / "-"                    {return {op:"==",gap:"__STANDARD__"};}
+  / "~" gap:GapChars+ "~"  {return {op:"<=",gap:gap.join("")};}
+  / "~" "-" "~"            {return {op:"<=",gap:"__STANDARD__"};}
+  / "~"                    {return {op:"<="};}
+  / ""                     {return {op:"=="};}
+
+GapChars 
+  = [a-zA-Z0-9#._$]
 
   
 StrengthAndWeight
-  = "!" s:Strength w:Weight?  {
-      if (w.length === 0) {return [s];}
-      return [s,w];
-    }
-  / "!" .? {return parser.error("Invalid Strength",line,column)}
+  = "!" s:[a-zA-Z]+ w:([0-9]+)? {if (w.join){w=w.join("");} return "!" + s.join("") + w;}
+  / "!" .? {return parser.error("Invalid Strength or Weight",line,column)}
 
-Weight
-  = ":" w:[0-9]+   {return Number(w.join(""))}
-  / ":" . {return parser.error("Invalid Weight",line,column)}
 
 Strength
   = ("require"  / "REQUIRE"  / "Require")  {return "require"}
