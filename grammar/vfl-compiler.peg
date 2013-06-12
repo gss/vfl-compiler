@@ -125,11 +125,27 @@ Option
   = __ key:NameChars+ "(" value:NameChars+ ")" {return {key:key.join(''), value:value.join('')}}
 
 View
-  = "[" name:NameChars+ "]"  {return name.join("")}
+  = "[" name:NameChars+ Predicate? "]"  {return name.join("")}
   / "|"
-  // super view...
   // errorr 
-  
+
+Predicate
+  = "(" Eq (PredOp / PredView / Number+)+ StrengthAndWeight? ")" {return "pred"}
+
+Eq
+  = "=="
+  / "<="
+  / "<"
+  / ">="
+  / ">"
+
+PredOp 
+  = [+\-/*]
+
+PredView
+  = name:NameChars+  {return name.join("")}
+
+
 Connection
   = "-" gap:GapChars+ "-"  {return {op:"==",gap:gap.join("")};}
   / "-"                    {return {op:"==",gap:"__STANDARD__"};}
@@ -163,11 +179,14 @@ NameCharsWithSpace
   = NameChars / " "
 
 Literal
-  = val:(Real / Integer) {
+  = val:Number {
     return [ "number",
       val
     ]
   }
+
+Number
+  = Real / Integer
 
 Integer
   = digits:[0-9]+ {
