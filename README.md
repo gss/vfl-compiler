@@ -1,12 +1,14 @@
 VFL Compiler [![Build Status](https://travis-ci.org/the-gss/vfl-compiler.png?branch=master)](https://travis-ci.org/the-gss/vfl-compiler)
 =============
 
-This library compiles Grid flavored [Visual Format Language](http://developer.apple.com/library/ios/#documentation/UserExperience/Conceptual/AutolayoutPG/Articles/formatLanguage.html) from [Cocoa Autolayout](http://developer.apple.com/library/ios/#documentation/UserExperience/Conceptual/AutolayoutPG/Articles/formatLanguage.html), into Grid flavored [CCSS](http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.101.4819) statements.
+This library compiles Grid flavored VFL ([Visual Format Language](http://developer.apple.com/library/ios/#documentation/UserExperience/Conceptual/AutolayoutPG/Articles/formatLanguage.html) from [Cocoa Autolayout](http://developer.apple.com/library/ios/#documentation/UserExperience/Conceptual/AutolayoutPG/Articles/formatLanguage.html)), into Grid flavored CCSS (Greg Badros's [Constraint CSS](http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.101.4819)) statements.
 
 
 # API
 
 > Below examples omit the vendor prefix., so `@horizontal` is lazy-hand for `@-gss-horizontal`
+
+## Horizontal & Vertical Connections
 
 #### Horizontal Connections with a Gap
 
@@ -36,7 +38,7 @@ which is equivalent to the CCSS statement:
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/flushViews.png)
 
-#### Vertical Layout
+#### Vertical 
 
 Use `vertical` instead of `horizontal`.
 
@@ -44,9 +46,25 @@ Use `vertical` instead of `horizontal`.
 @vertical [#topField]-[#bottomField]
 ```
 
+which is equivalent to the CCSS statement:
+
+`#topField[bottom] + 8 == #bottomField[top]`
+
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/verticalLayout.png)
 
-#### Width Constraint
+## Containment
+
+#### Connection to Superview
+
+```
+@horizontal |-50-[#purple]-50-| in(#box);
+```
+
+![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/connectionToSuperview.png)
+
+## Size Predicates
+
+#### Width Predicate
 
 ```
 @horizontal [#button(>=50)];
@@ -62,14 +80,6 @@ Use `vertical` instead of `horizontal`.
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/multiplePredicates.png)
 
-#### Connection to Superview
-
-```
-@horizontal |-50-[#purple]-50-| in(#box);
-```
-
-![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/connectionToSuperview.png)
-
 #### Equal Widths
 
 ```
@@ -78,15 +88,32 @@ Use `vertical` instead of `horizontal`.
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/equalWidths.png)
 
-#### A Complete Line of Layout
+#### Predicates with Strength & Weight
+
+For more about Constraint Strength & Weight and the Constriant Hierarchy, [check it]().  In a nutshell, stronger constraints completely overcome weaker ones, and required constraints must be satisfied.
+
+Strengths can be weak, medium, strong, required.  Weights can be Integers.
+
+The following Grid flavored VFL:
 
 ```
-@horizontal |-[#find]-[#findNext]-[#findField(>=20)]-|;
+@horizontal [#b1(==#b2!weak)][#b2(==#b3!medium10)][#b3] !required;
 ```
 
-![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/completeLayout.png)
+is equivalent to the following CCSS:
 
-#### Cushion Connections
+```
+    #b1[width] == #b2[width] !weak;
+    #b2[width] == #b3[width] !medium10;
+    #b1[right] == #b2[left] !required;
+    #b2[right] == #b3[left] !required;
+```
+
+> Hardcore Gotcha: The lexographic order of Constraints matters, so take heed.
+
+## Cushions
+
+#### Basic Cushion
 
 Cushion connections, those with `~`, are essentially single dimensional non-overlapping constraints.
 
@@ -100,6 +127,8 @@ which is equivalent to the following CCSS:
 
 `#panelA[right] <= #panelB[left]`
 
+#### Cushion with Gap
+
 To cushion by the standard gap:
 
 ```
@@ -111,6 +140,17 @@ To cushion by an explicit gap:
 ```
 @horizontal [#panelA]~8~[#panelB];
 ```
+
+## Demos
+
+#### A Complete Line of Layout
+
+```
+@horizontal |-[#find]-[#findNext]-[#findField(>=20)]-|;
+```
+
+![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/completeLayout.png)
+
 
 #### Constraining the Standard Gap
 
@@ -126,6 +166,10 @@ For example, to define a layout where the horizontal gap prefers to be 10% of a 
 ```
 
 This is where the powers of CCSS and VFL come together for pure awesome.
+
+#### Hardcore Examples
+
+*Tests, bro*
 
 ----------------------
 
