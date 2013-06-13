@@ -76,7 +76,19 @@ describe 'VFL-to-CCSS Compiler', ->
               '#sub[bottom] == #parent[bottom]'          
             ]
           ]
-          
+    
+    parse """
+            @vertical |[#sub]|; // super view defaults to ::this
+          """
+        ,
+          [
+            [
+              'ccss'
+              '::this[top] == #sub[top]'
+              '#sub[bottom] == ::this[bottom]'          
+            ]
+          ]
+    
     parse """
             @horizontal |-[#sub1]-[#sub2]-| in(#parent); // super view with standard gaps
           """
