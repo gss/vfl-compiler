@@ -8,56 +8,78 @@ This library compiles Grid flavored VFL ([Visual Format Language](http://develop
 
 > Below examples omit the vendor prefix., so `@horizontal` is lazy-hand for `@-gss-horizontal`
 
-## Horizontal & Vertical Connections
+## Basics
 
-#### Horizontal Connections with a Gap
+#### Connections with a Gap
 
-This examples uses a standard horizontal gap:
-
-```
-@horizontal [#button]-[#input];
-```
-
-to explicitly define the gap:
+To horizontally seperate `#button` 8px from `#input`:
 
 ```
-@horizontal [#button]-8-[#input];
+    @horizontal [#button]-8-[#input];
 ```
 
-which is equivalent to the CCSS statement:
-
-`#button[right] + 8 == #input[left]`
+which is equivalent to the CCSS statement: `#button[right] + 8 == #input[left]`
 
 ![Grid flavored VFL: standard gap](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/standardSpace.png)
 
 #### Flush Connection
 
 ```
-@horizontal [#maroonView][#oceanView];
+    @horizontal [#maroonView][#oceanView];
 ```
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/flushViews.png)
 
-#### Vertical 
+#### Vertical or Horizontal
 
 Use `vertical` instead of `horizontal`.
 
 ```
-@vertical [#topField]-[#bottomField]
+    @vertical [#topField]-8-[#bottomField]
 ```
 
-which is equivalent to the CCSS statement:
-
-`#topField[bottom] + 8 == #bottomField[top]`
+which is equivalent to the CCSS statement: `#topField[bottom] + 8 == #bottomField[top]`
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/verticalLayout.png)
+
+## Standard Gaps
+
+#### Connections with the Standard Gap
+
+To horizontally align 6 boxes with a Standard Gap seperation between each:
+
+```
+    @horizontal [#box1]-[#box2]-[#box3]-[#box4]-[#box5]-[#box6];
+```
+
+An internal constraint variable is used when a single `-` is used for the gap, the *Standard Gap*.  For horizontal layouts use the `[hgap]` variable, and vertical layouts use the `[vgap]` variable.
+
+To set the standard gaps, just use them like vanilla [CCSS variables](), like so:
+
+```
+    [hgap] == 8;
+    @horizontal [#box1]-[#box2]-[#box3]-[#box4]-[#box5]-[#box6];
+```
+
+#### Constraining the Standard Gap
+
+For example, to define a layout where the horizontal gap prefers to be 1/16th of the viewports width, but never below 100px:
+
+```
+    [hgap] == ::viewport[width]/16 !strong;
+    [hgap] >= 100 !required;
+
+    @horizontal [#b1]-[#b2]-[#b3]-[#b4];
+```
+
+This is where the powers of CCSS and VFL come together for pure awesome.
 
 ## Containment
 
 #### Connection to Superview
 
 ```
-@horizontal |-50-[#purple]-50-| in(#box);
+    @horizontal |-50-[#purple]-50-| in(#box);
 ```
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/connectionToSuperview.png)
@@ -67,7 +89,7 @@ which is equivalent to the CCSS statement:
 #### Width Predicate
 
 ```
-@horizontal [#button(>=50)];
+    @horizontal [#button(>=50)];
 ```
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/widthConstraint.png)
@@ -75,7 +97,7 @@ which is equivalent to the CCSS statement:
 #### Multiple Predicates
 
 ```
-@horizontal [#flexibleButton(>=70,<=100)];
+    @horizontal [#flexibleButton(>=70,<=100)];
 ```
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/multiplePredicates.png)
@@ -83,7 +105,7 @@ which is equivalent to the CCSS statement:
 #### Equal Widths
 
 ```
-@horizontal [#button1(==#button2)];
+    @horizontal [#button1(==#button2)];
 ```
 
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/equalWidths.png)
@@ -97,7 +119,7 @@ Strengths can be weak, medium, strong, required.  Weights can be Integers.
 The following Grid flavored VFL:
 
 ```
-@horizontal [#b1(==#b2!weak)][#b2(==#b3!medium10)][#b3] !required;
+    @horizontal [#b1(==#b2!weak)][#b2(==#b3!medium10)][#b3] !required;
 ```
 
 is equivalent to the following CCSS:
@@ -120,25 +142,23 @@ Cushion connections, those with `~`, are essentially single dimensional non-over
 To ensure `#panelA`s right edge doesn't go passed `#panelB`s left edge:
 
 ```
-@horizontal [#panelA]~[#panelB];
+    @horizontal [#panelA]~[#panelB];
 ```
 
-which is equivalent to the following CCSS:
-
-`#panelA[right] <= #panelB[left]`
+which is equivalent to the following CCSS: `#panelA[right] <= #panelB[left]`
 
 #### Cushion with Gap
 
 To cushion by the standard gap:
 
 ```
-@horizontal [#panelA]~-~[#panelB];
+    @horizontal [#panelA]~-~[#panelB];
 ```
 
 To cushion by an explicit gap:
 
 ```
-@horizontal [#panelA]~8~[#panelB];
+    @horizontal [#panelA]~8~[#panelB];
 ```
 
 ## Demos
@@ -152,24 +172,9 @@ To cushion by an explicit gap:
 ![](http://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Art/completeLayout.png)
 
 
-#### Constraining the Standard Gap
+#### Gotchas & Hardcore Examples
 
-To set and/or constrain the gap used in the layout connections, use the `hgap` or `vgap` variables in regular GSS.  
-
-For example, to define a layout where the horizontal gap prefers to be 10% of a button's width, but never below 100px:
-
-```
-[hgap] == #b1[width]/10 !weak;
-[hgap] >= 100 !required;
-
-@horizontal [#b1]-[#b2]-[#b3]-[#b4];
-```
-
-This is where the powers of CCSS and VFL come together for pure awesome.
-
-#### Hardcore Examples
-
-*Tests, bro*
+*Tests, bro*.  
 
 ----------------------
 
