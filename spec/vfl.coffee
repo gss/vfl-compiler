@@ -197,17 +197,41 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
           
     parse """
-            @horizontal [#b1(<=100, ==#b99!99)][#b2(>= #b1 *2  !weak10, <=3!required)] !medium200; // multiple, connected predicates w/ strength & weight
+            @horizontal [#b1( <=100 , ==#b99 !99 )][#b2(>= #b1 *2  !weak10, <=3!required)]-100-[.b3(==200)] !medium200; // multiple, connected predicates w/ strength & weight
           """
         ,
           [
             [
               'ccss'
               '#b1[width] <= 100'
-              '#b1[width] <= #b99[width] !99'
+              '#b1[width] == #b99[width] !99'
               '#b2[width] >= #b1[width] * 2 !weak10'
               '#b2[width] <= 3 !required'
               '#b1[right] == #b2[left] !medium200'
+              '.b3[width] == 200'
+              '#b2[right] + 100 == .b3[left] !medium200'
+            ]
+          ]
+    
+    parse """
+            @horizontal [#b1(==[colwidth])]; // predicate with constraint variable
+          """
+        ,
+          [
+            [
+              'ccss'
+              '#b1[width] == [colwidth]'
+            ]
+          ]
+    
+    parse """
+            @horizontal [#b1(==#b2[height])]; // predicate with explicit view variable
+          """
+        ,
+          [
+            [
+              'ccss'
+              '#b1[width] == #b2[height]'
             ]
           ]
 
