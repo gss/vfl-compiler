@@ -52,7 +52,9 @@ To horizontally align 6 boxes with a Standard Gap seperation between each:
     @horizontal [#box1]-[#box2]-[#box3]-[#box4]-[#box5]-[#box6];
 ```
 
-An internal constraint variable is used when a single `-` is used for the gap, the *Standard Gap*.  For horizontal layouts use the `[hgap]` variable, and vertical layouts use the `[vgap]` variable.
+An internal constraint variable is used when a single `-` is used for the gap, the *Standard Gap*.  Horizontal layouts use the `[hgap]` variable, and vertical layouts use the `[vgap]` variable.
+
+#### Defining the Standard Gap
 
 To set the standard gaps, just use them like vanilla [CCSS variables](), like so:
 
