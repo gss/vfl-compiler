@@ -1,27 +1,50 @@
 {
-  var p, parser, cs, leftVarNames, superLeftVarNames, rightVarNames, superRightVarNames, standardGapNames, getSuperViewName, getGapString; 
+  var p, parser, cs, leftVarNames, superLeftVarNames, rightVarNames, superRightVarNames, standardGapNames, getSuperViewName, getGapString, sizeVarNames; 
 
   p = parser = this;
+
+  sizeVarNames = ["width", "height"];
+  leftVarNames = ["right", "bottom"];
+  superLeftVarNames = ["left", "top"];
+  rightVarNames = ["left", "top"];
+  superRightVarNames = ["right", "bottom"];
 
   cs = parser.cs = [];
 
   parser.addC = function (c) {
     cs.push(c);
   };
+
+  parser.addPreds = function (view,preds,d) {
+    var pred, cccss, eq, exps, exp;
+    if (preds) {      
+      for (var i = 0; i < preds.length; i++) {       
+        pred = preds[i]        
+        eq = pred[0];
+        ccss = view + "[" + sizeVarNames[d] + "] " + eq + " "
+        exps = pred[1]
+        for (var j = 0; j < exps.length; j++) {       
+          exp = exps[j]
+          if (exp[0] === "view") {
+            exp = exp[1] + "[" + sizeVarNames[d] + "]"
+          }
+          ccss += exp + " "
+        }
+        ccss += pred[2] // strength & weight
+        cs.push(ccss.trim());
+      }
+    }
+  }
   
-  leftVarNames = ["right", "bottom"];
-  superLeftVarNames = ["left", "top"];
-  rightVarNames = ["left", "top"];
-  superRightVarNames = ["right", "bottom"];
+  
 
   getSuperViewName = function (o) {
-    if (o.in === null) {return "::this";}
+    if (o.in === undefined) {return "::this";}
     else {return o.in;}
   }
 
   parser.getLeftVar = function (view, dimension, o) {
     var varName;
-    
     if (view === "|") {
       view = getSuperViewName(o);
       varName = superLeftVarNames[dimension];
@@ -72,6 +95,11 @@
     return m;
   }
 
+  parser.join = function (a) {
+    if (a.join){return a.join("");}
+    return a;
+  }
+
 }
 
 start
@@ -84,25 +112,28 @@ VFLStatement
   = d:Dimension __ head:View
     tail:(__ Connection? __ View)* __ o:Options?
     __ s:StrengthAndWeight?         {
-      var connection, view2, result, ccss;
+      var connection, view2, result, ccss, headView;
       result = head;
+      headView = head.view
+      parser.addPreds(headView,head.preds,d)
       for (var i = 0; i < tail.length; i++) {        
         connection = tail[i][1];
-        view2 = tail[i][3];
+        view2 = tail[i][3].view;
+        parser.addPreds(view2,tail[i][3].preds,d)
         result = [
           //"c",
           connection,
           result,
           view2
         ];
-        ccss = parser.getLeftVar(head, d, o) + " " + 
+        ccss = parser.getLeftVar(headView, d, o) + " " + 
           parser.getConnectionString(connection, d) + " " +
           parser.getRightVar(view2, d, o) + " " +
           s
         parser.addC(
           ccss.trim()
         );
-        head = view2;
+        headView = view2;
       }
       return "VFL Statement";
     }
@@ -125,26 +156,36 @@ Option
   = __ key:NameChars+ "(" value:NameChars+ ")" {return {key:key.join(''), value:value.join('')}}
 
 View
-  = "[" name:NameChars+ Predicate? "]"  {return name.join("")}
-  / "|"
+  = "[" name:NameChars+ p:Predicate? "]"  {return {view:name.join(""),preds:p}}
+  / "|"                                   {return {view:"|"}}
   // errorr 
 
 Predicate
-  = "(" Eq (PredOp / PredView / Number+)+ StrengthAndWeight? ")" {return "pred"}
+  = "(" preds:(PredEq PredExpression StrengthAndWeight? _? PredSeperator _?)+ ")" {return preds}
 
-Eq
-  = "=="
-  / "<="
-  / "<"
-  / ">="
-  / ">"
+PredExpression 
+  = (PredOp / PredLiteral / PredVariable / PredViewVariable / PredView )+
+
+PredEq
+  = _? eq:("==" / "<=" / "<" / ">=" / ">") _?  {return eq}
 
 PredOp 
-  = [+\-/*]
+  = op:[+\-/*] _? {return op}
 
 PredView
-  = name:NameChars+  {return name.join("")}
+  = name:NameChars+ _? {return ["view",name.join("")]}
 
+PredLiteral
+  = n:Number+ _? {return n.join("")}
+
+PredVariable
+  = "[" name:NameChars+ "]" _?  {return "[" + name.join("") + "]"}
+
+PredViewVariable
+  = view:NameChars+ "[" prop:NameChars+ "]" _?  {return view.join("") + "[" + prop.join("") + "]"}
+
+PredSeperator
+  = ","? {return ""}
 
 Connection
   = "-" gap:GapChars+ "-"  {return {op:"==",gap:gap.join("")};}
@@ -159,7 +200,7 @@ GapChars
 
   
 StrengthAndWeight
-  = "!" s:[a-zA-Z]+ w:([0-9]+)? {if (w.join){w=w.join("");} return "!" + s.join("") + w;}
+  = "!" s:([a-zA-Z]+)? w:([0-9]+)? {  return "!" + p.join(s) + p.join(w);}
   / "!" .? {return parser.error("Invalid Strength or Weight",line,column)}
 
 
