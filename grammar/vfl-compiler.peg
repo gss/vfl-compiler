@@ -153,7 +153,14 @@ Options
   }
 
 Option
-  = __ key:NameChars+ "(" value:NameChars+ ")" {return {key:key.join(''), value:value.join('')}}
+  = __ chain:Chain { return chain }
+  / __ key:NameChars+ "(" value:NameChars+ ")" {return {key:key.join(''), value:value.join('')}}
+
+Chain 'Chain'
+  = "chain-" prop:NameChars+ preds:ChainPredicate { return {'chain':prop,preds:preds}}
+
+ChainPredicate
+  = "(" preds:([^)])+ ")" {return preds.join()}
 
 View
   = "[" name:NameChars+ p:Predicate? "]"  {return {view:name.join(""),preds:p}}
