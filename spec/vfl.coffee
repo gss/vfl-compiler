@@ -236,7 +236,7 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
   
   
-  # Equality Chains
+  # Chains
   # --------------------------------------------------
   
   describe '/* Chains */', ->
@@ -251,6 +251,20 @@ describe 'VFL-to-CCSS Compiler', ->
               '#b1[right] == #b2[left]'
               '#b1[height] == #b2[height]'
               '#b1[width] == 250 == #b2[width]'
+            ]
+          ]
+    
+    parse """
+            @horizontal [#b1][#b2][#b3] chain-width(==[colwidth]!strong,<=500!required); // mutliple chain predicates
+          """
+        ,
+          [
+            [
+              'ccss'
+              '#b1[right] == #b2[left]'
+              '#b1[height] == #b2[height]'
+              '#b1[width] == [colwidth] == #b2[width] == [colwidth] == #b3[width]'
+              '#b1[width] <= 500 >= #b2[width] <= 500 >= #b3[width]'
             ]
           ]
           
