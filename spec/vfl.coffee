@@ -239,23 +239,23 @@ describe 'VFL-to-CCSS Compiler', ->
   # Equality Chains
   # --------------------------------------------------
   
-  describe '/* Equality Chains */', ->
+  describe '/* Chains */', ->
     
     parse """
-            @horizontal [#b1][#b2] equal-height(!strong) equal-width(250); // basic equality chains
+            @horizontal [#b1][#b2] chain-height chain-width(250); // basic equality chains
           """
         ,
           [
             [
               'ccss'
               '#b1[right] == #b2[left]'
-              '#b1[height] == #b2[height] !strong'
+              '#b1[height] == #b2[height]'
               '#b1[width] == 250 == #b2[width]'
             ]
           ]
           
     parse """
-            @vertical [#b1][#b2][#b3][#b4] equal-centerX equal-width(!weak10) equal-height(150!required) !medium; // adv equality chains
+            @vertical [#b1][#b2][#b3][#b4] chain-width(==!weak10) chain-height(<=150>=!required) !medium; // explicit equality & inequality chains
           """
         ,
           [
@@ -264,14 +264,13 @@ describe 'VFL-to-CCSS Compiler', ->
               '#b1[bottom] == #b2[top] !medium'
               '#b2[bottom] == #b3[top] !medium'
               '#b3[bottom] == #b4[top] !medium'
-              '#b1[centerX] == #b2[centerX] == #b3[centerX] == #b4[centerX]'
               '#b1[width] == #b2[width] == #b3[width] == #b4[width] !weak10'
-              '#b1[height] == 150 == #b2[height] == 150 == #b3[height] == 150 == #b4[height] !required;'
+              '#b1[height] <= 150 >= #b2[height] <= 150 >= #b3[height] <= 150 >= #b4[height] !required;'
             ]
           ]
     
     parse """
-            @vertical [#b1(==100!strong)] equal-centerX equal-width( 50 !weak10); // single view w/ equality chains
+            @vertical [#b1(==100!strong)] chain-centerX chain-width( 50 !weak10); // single view w/ equality chains
           """
         ,
           [
@@ -283,7 +282,7 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
     
     parse """
-            @vertical |-8-[#b1(==100!strong)][#b2]-8-| in(#panel) equal-centerX( #panel[centerX] !required) equal-width(50!weak10); // adv w/ super views & equality chains
+            @vertical |-8-[#b1(==100!strong)][#b2]-8-| in(#panel) chain-centerX( #panel[centerX] !required) chain-width(>=50=<!weak10); // adv w/ super views & chains
           """
         ,
           [
@@ -294,7 +293,7 @@ describe 'VFL-to-CCSS Compiler', ->
               '#b1[bottom] == #b2[top]'
               '#b2[bottom] + 8 == #panel[bottom]'              
               '#b1[centerX] == #panel[centerX] == #b2[centerX] !required'
-              '#b1[width] == 50 == #b2[width]'
+              '#b1[width] >= 50 <= #b2[width]'
             ]
           ]
 
