@@ -102,8 +102,13 @@
 
 }
 
+
+
 start
-  = __ statements:(Statement*) __ { return (parser.getResults()); }
+  = __ Statement* __ { return parser.getResults(); }
+
+debug 
+  = __ vfl:Statement* __ { return parser.getResults().concat(vfl); }
 
 Statement
   = exp:VFLStatement EOS __ { return exp; }
@@ -135,7 +140,7 @@ VFLStatement
         );
         headView = view2;
       }
-      return "VFL Statement";
+      return {'vfl':d, o:o};
     }
 
 Dimension
@@ -146,8 +151,11 @@ Dimension
 Options
   = os:Option+  {
     var obj = {};
+    obj.chains = []
     for (var i = 0; i < os.length; i++) {    
       obj[os[i].key] = os[i].value;
+      // proccess chains
+      if (!!os[i].chain) {obj.chains.push(os[i].chain);}
     }
     return obj;
   }
@@ -157,10 +165,11 @@ Option
   / __ key:NameChars+ "(" value:NameChars+ ")" {return {key:key.join(''), value:value.join('')}}
 
 Chain 'Chain'
-  = "chain-" prop:NameChars+ preds:ChainPredicate { return {'chain':prop,preds:preds}}
+  = "chain-" prop:NameChars+ preds:ChainPredicate? { return {'chain':[prop.join(""),preds]}}
 
 ChainPredicate
-  = "(" preds:([^)])+ ")" {return preds.join()}
+  = "(" headEq:PredEq? _? value:([^>=<!)]+)? _? tailEq:PredEq? _? s:StrengthAndWeight ")" {return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:s}}
+  // "(" preds:([^>=<!)])+ ")" 
 
 View
   = "[" name:NameChars+ p:Predicate? "]"  {return {view:name.join(""),preds:p}}
@@ -174,7 +183,7 @@ PredExpression
   = (PredOp / PredLiteral / PredVariable / PredViewVariable / PredView )+
 
 PredEq
-  = _? eq:("==" / "<=" / "<" / ">=" / ">") _?  {return eq}
+  = _? eq:("==" / "<=" / "<" / ">=" / ">" / "=<"{return "<=";} / "=>"{return ">=";}) _?  {return eq}
 
 PredOp 
   = op:[+\-/*] _? {return op}
