@@ -36,7 +36,7 @@ module.exports = ->
 
     # Code quality checks
     jshint:
-      all: ['lib/*.js']
+      all: ['lib/compiler.js']
 
     # BDD tests on Node.js
     cafemocha:
