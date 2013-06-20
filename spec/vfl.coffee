@@ -262,9 +262,9 @@ describe 'VFL-to-CCSS Compiler', ->
             [
               'ccss'
               '#b1[right] == #b2[left]'
-              '#b1[height] == #b2[height]'
-              '#b1[width] == [colwidth] == #b2[width] == [colwidth] == #b3[width]'
-              '#b1[width] <= 500 >= #b2[width] <= 500 >= #b3[width]'
+              '#b2[right] == #b3[left]'
+              '#b1[width] == [colwidth] == #b2[width] == [colwidth] == #b3[width] !strong'
+              '#b1[width] <= 500 >= #b2[width] <= 500 >= #b3[width] !required'
             ]
           ]
           
@@ -279,7 +279,7 @@ describe 'VFL-to-CCSS Compiler', ->
               '#b2[bottom] == #b3[top] !medium'
               '#b3[bottom] == #b4[top] !medium'
               '#b1[width] == #b2[width] == #b3[width] == #b4[width] !weak10'
-              '#b1[height] <= 150 >= #b2[height] <= 150 >= #b3[height] <= 150 >= #b4[height] !required;'
+              '#b1[height] <= 150 >= #b2[height] <= 150 >= #b3[height] <= 150 >= #b4[height] !required'
             ]
           ]
     
@@ -291,7 +291,6 @@ describe 'VFL-to-CCSS Compiler', ->
             [
               'ccss'
               '#b1[height] == 100 !strong'
-              '#b1[width] == 50 !weak10'
             ]
           ]
     
@@ -307,7 +306,7 @@ describe 'VFL-to-CCSS Compiler', ->
               '#b1[bottom] == #b2[top]'
               '#b2[bottom] + 8 == #panel[bottom]'              
               '#b1[centerX] == #panel[centerX] == #b2[centerX] !required'
-              '#b1[width] >= 50 <= #b2[width]'
+              '#b1[width] >= 50 <= #b2[width] !weak10'
             ]
           ]
 

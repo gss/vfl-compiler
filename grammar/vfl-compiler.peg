@@ -18,7 +18,7 @@
   parser.addPreds = function (view,preds,d) {
     var pred, cccss, eq, exps, exp;
     if (preds) {      
-      for (var i = 0; i < preds.length; i++) {       
+      for (var i = 0; i < preds.length; i++) {
         pred = preds[i]        
         eq = pred[0];
         ccss = view + "[" + sizeVarNames[d] + "] " + eq + " "
@@ -34,6 +34,57 @@
         cs.push(ccss.trim());
       }
     }
+  }
+
+  parser.defaultChainObject = {
+    headEq: "==",
+    value: "",
+    tailEq: "",
+    s: ""
+  }
+  parser.chainTailEqMap = {
+    "<=": ">=",
+    ">=": "<=",
+    "==": "==",
+    "<" : ">",
+    ">" : "<" 
+  }
+
+  parser.addChains = function (views,o) {
+    var chains, chain, prop, preds, connector, ccss;    
+    chains = o.chains
+    if (chains) {            
+      for (var i = 0; i < chains.length; i++) {
+        chain = chains[i]
+        prop = chain[0]
+        preds = chain[1]  
+        if (preds === "") {preds = [parser.defaultChainObject];} // load default chain predicate
+        for (var j = 0; j < preds.length; j++) {
+          pred = preds[j];
+          ccss = ""
+          for (var k = 0; k < views.length - 1; k++) {
+            view = views[k];  
+            if (pred.headEq === "") {pred.headEq = parser.defaultChainObject.headEq}
+            ccss += " " + view + "[" + prop + "] " + pred.headEq
+            if (pred.value !== "") {
+              ccss += " " + pred.value              
+              if (views.length > 1) {
+                if (pred.tailEq === "") {pred.tailEq = parser.chainTailEqMap[pred.headEq]}
+                ccss += " " + pred.tailEq
+              }
+              else {
+                ccss += " " + pred.s
+                cs.push(ccss.trim())
+              }
+            }
+          }
+          if (views.length > 1) {
+             ccss += " " + views[views.length-1] + "[" + prop + "]" + " " + pred.s
+             cs.push(ccss.trim())
+          }
+        }
+      }
+    } 
   }
   
   
@@ -117,13 +168,16 @@ VFLStatement
   = d:Dimension __ head:View
     tail:(__ Connection? __ View)* __ o:Options?
     __ s:StrengthAndWeight?         {
-      var connection, view2, result, ccss, headView;
-      result = head;
-      headView = head.view
-      parser.addPreds(headView,head.preds,d)
+      var connection, view2, result, ccss, headView, chainedViews;      
+      result = head;      
+      headView = head.view;
+      chainedViews = [];      
+      if (headView !== "|") {chainedViews.push(headView);}
+      parser.addPreds(headView,head.preds,d);      
       for (var i = 0; i < tail.length; i++) {        
         connection = tail[i][1];
         view2 = tail[i][3].view;
+        if (view2 !== "|") {chainedViews.push(view2);}
         parser.addPreds(view2,tail[i][3].preds,d)
         result = [
           //"c",
@@ -140,6 +194,7 @@ VFLStatement
         );
         headView = view2;
       }
+      parser.addChains(chainedViews,o)
       return {'vfl':d, o:o};
     }
 
@@ -173,7 +228,7 @@ ChainPredicate
 ChainPredicateItems
   = item:ChainPredicateItem _? ","? {return item}
 
-// TODO: make more DRY
+// TODO: make more DRY... if all rules are optional sends parser into infinite loop
 ChainPredicateItem
   = headEq:PredEq _  value:ChainPredVal? _? tailEq:PredEq? _? s:StrengthAndWeight? {
       return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:s}}
@@ -183,7 +238,7 @@ ChainPredicateItem
       return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:s}}
 
 ChainPredVal
-  = [^>=<!)]+
+  = [^>=<!) ]+
 
 View
   = "[" name:NameChars+ p:Predicate? "]"  {return {view:name.join(""),preds:p}}
