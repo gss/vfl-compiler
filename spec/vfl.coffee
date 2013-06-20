@@ -42,9 +42,9 @@ describe 'VFL-to-CCSS Compiler', ->
             [
               'ccss'
               "#b1[bottom] + [vgap] == #b2[top]"
-              "#b2[bottom] + [vgap] == #b3[top]"    
-              "#b3[bottom] + [vgap] == #b4[top]"    
-              "#b4[bottom] + [vgap] == #b5[top]"    
+              "#b2[bottom] + [vgap] == #b3[top]"
+              "#b3[bottom] + [vgap] == #b4[top]"
+              "#b4[bottom] + [vgap] == #b5[top]"
             ]
           ]
     
@@ -167,7 +167,7 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             [
               'ccss'
-              '#sub[height] == 100'                  
+              '#sub[height] == 100'
             ]
           ]
     
@@ -179,7 +179,7 @@ describe 'VFL-to-CCSS Compiler', ->
             [
               'ccss'
               '#box[height] <= 100 !required'
-              '#box[height] >= 30 !strong100'                  
+              '#box[height] >= 30 !strong100'
             ]
           ]
     
