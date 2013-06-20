@@ -34,6 +34,10 @@ module.exports = ->
       files: ['spec/*.coffee', 'grammar/*.peg', 'lib/compiler.js']
       tasks: ['test']
 
+    # Code quality checks
+    jshint:
+      all: ['lib/*.js']
+
     # BDD tests on Node.js
     cafemocha:
       nodejs:
@@ -61,11 +65,12 @@ module.exports = ->
   @loadNpmTasks 'grunt-contrib-uglify'
 
   # Grunt plugins used for testing
+  @loadNpmTasks 'grunt-contrib-jshint'
   @loadNpmTasks 'grunt-cafe-mocha'
   @loadNpmTasks 'grunt-contrib-coffee'
   @loadNpmTasks 'grunt-mocha-phantomjs'
   @loadNpmTasks 'grunt-contrib-watch'
 
   @registerTask 'build', ['peg', 'component', 'component_build', 'uglify']
-  @registerTask 'test', ['build', 'coffee', 'cafemocha', 'mocha_phantomjs']
+  @registerTask 'test', ['build', 'jshint', 'coffee', 'cafemocha', 'mocha_phantomjs']
   @registerTask 'default', ['build']
