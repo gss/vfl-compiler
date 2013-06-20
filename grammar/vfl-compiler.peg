@@ -16,83 +16,90 @@
   };
 
   parser.addPreds = function (view,preds,d) {
-    var pred, ccss, eq, exps, exp, view;
+    var pred, ccss, eq, exps, exp;
     if (preds) {      
       for (var i = 0; i < preds.length; i++) {
-        pred = preds[i]        
+        pred = preds[i];
         eq = pred[0];
-        ccss = view + "[" + sizeVarNames[d] + "] " + eq + " "
-        exps = pred[1]
+        ccss = view + "[" + sizeVarNames[d] + "] " + eq + " ";
+        exps = pred[1];
         for (var j = 0; j < exps.length; j++) {       
-          exp = exps[j]
+          exp = exps[j];
           if (exp[0] === "view") {
-            exp = exp[1] + "[" + sizeVarNames[d] + "]"
+            exp = exp[1] + "[" + sizeVarNames[d] + "]";
           }
-          ccss += exp + " "
+          ccss += exp + " ";
         }
-        ccss += pred[2] // strength & weight
+        ccss += pred[2]; // strength & weight
         cs.push(ccss.trim());
       }
     }
-  }
+  };
 
   parser.defaultChainObject = {
     headEq: "==",
     value: "",
     tailEq: "",
     s: ""
-  }
+  };
+
   parser.chainTailEqMap = {
     "<=": ">=",
     ">=": "<=",
     "==": "==",
     "<" : ">",
     ">" : "<" 
-  }
+  };
 
   parser.addChains = function (views,o) {
     var chains, chain, prop, preds, connector, ccss, view, pred;
-    chains = o.chains
+    chains = o.chains;
     if (chains) {            
       for (var i = 0; i < chains.length; i++) {
-        chain = chains[i]
-        prop = chain[0]
-        preds = chain[1]  
-        if (preds === "") {preds = [parser.defaultChainObject];} // load default chain predicate
+        chain = chains[i];
+        prop = chain[0];
+        preds = chain[1];
+        if (preds === "") {
+          preds = [parser.defaultChainObject];
+        } // load default chain predicate
         for (var j = 0; j < preds.length; j++) {
           pred = preds[j];
-          ccss = ""
+          ccss = "";
           for (var k = 0; k < views.length - 1; k++) {
             view = views[k];  
-            if (pred.headEq === "") {pred.headEq = parser.defaultChainObject.headEq}
-            ccss += " " + view + "[" + prop + "] " + pred.headEq
+            if (pred.headEq === "") {
+              pred.headEq = parser.defaultChainObject.headEq;
+            }
+            ccss += " " + view + "[" + prop + "] " + pred.headEq;
             if (pred.value !== "") {
-              ccss += " " + pred.value              
+              ccss += " " + pred.value;
               if (views.length > 1) {
-                if (pred.tailEq === "") {pred.tailEq = parser.chainTailEqMap[pred.headEq]}
-                ccss += " " + pred.tailEq
+                if (pred.tailEq === "") {
+                  pred.tailEq = parser.chainTailEqMap[pred.headEq];
+                }
+                ccss += " " + pred.tailEq;
               }
               else {
-                ccss += " " + pred.s
-                cs.push(ccss.trim())
+                ccss += " " + pred.s;
+                cs.push(ccss.trim());
               }
             }
           }
           if (views.length > 1) {
-             ccss += " " + views[views.length-1] + "[" + prop + "]" + " " + pred.s
-             cs.push(ccss.trim())
+             ccss += " " + views[views.length-1] + "[" + prop + "]" + " " + pred.s;
+             cs.push(ccss.trim());
           }
         }
       }
     } 
-  }
-  
-  
+  };
 
   getSuperViewName = function (o) {
-    if (o.in === undefined) {return "::this";}
-    else {return o.in;}
-  }
+    if (o.in === undefined) {
+      return "::this";
+    }
+    return o.in;
+  };
 
   parser.getLeftVar = function (view, dimension, o) {
     var varName;
@@ -101,11 +108,10 @@
       varName = superLeftVarNames[dimension];
     }
     else {
-      varName = leftVarNames[dimension]
-      
+      varName = leftVarNames[dimension];
     }
     return view + "[" + varName + "]";
-  }
+  };
   
   parser.getRightVar = function (view, dimension, o) {
     var varName;
@@ -119,41 +125,39 @@
       
     }
     return view + "[" + varName + "]";
-  }
+  };
   
   standardGapNames = ["[hgap]", "[vgap]"];
   
   getGapString = function (g,d) {
     if (g === undefined) {return "";}
     if (g === "__STANDARD__") {g = standardGapNames[d];}
-    return "+ " + g
-  }
+    return "+ " + g;
+  };
 
-  
   parser.getConnectionString = function (c,d) {
-    return (getGapString(c.gap,d) + " " + c.op).trim()
-  }
+    return (getGapString(c.gap,d) + " " + c.op).trim();
+  };
 
   parser.getResults = function () {
     return [
       ["ccss"].concat(this.cs)
-    ]
-  }
+    ];
+  };
 
   parser.error = function (m,l,c) {
-    if (!!l && !!c) {m = m+ " {line:" + l + ", col:" + c + "}"} 
+    if (!!l && !!c) {
+      m = m + " {line:" + l + ", col:" + c + "}";
+    }
     console.error(m);
     return m;
-  }
+  };
 
   parser.join = function (a) {
     if (a.join){return a.join("");}
     return a;
-  }
-
+  };
 }
-
-
 
 start
   = __ Statement* __ { return parser.getResults(); }
@@ -178,35 +182,32 @@ VFLStatement
         connection = tail[i][1];
         view2 = tail[i][3].view;
         if (view2 !== "|") {chainedViews.push(view2);}
-        parser.addPreds(view2,tail[i][3].preds,d)
+        parser.addPreds(view2,tail[i][3].preds,d);
         result = [
           //"c",
           connection,
           result,
           view2
         ];
-        ccss = parser.getLeftVar(headView, d, o) + " " + 
-          parser.getConnectionString(connection, d) + " " +
-          parser.getRightVar(view2, d, o) + " " +
-          s
+        ccss = parser.getLeftVar(headView, d, o) + " " + parser.getConnectionString(connection, d) + " " + parser.getRightVar(view2, d, o) + " " + s;
         parser.addC(
           ccss.trim()
         );
         headView = view2;
       }
-      parser.addChains(chainedViews,o)
+      parser.addChains(chainedViews,o);
       return {'vfl':d, o:o};
     }
 
 Dimension
-  = ("@horizontal" / "@-gss-horizontal" / "@-gss-h") {return 0}
-  / ("@vertical" / "@-gss-vertical" / "@-gss-v") {return 1}
+  = ("@horizontal" / "@-gss-horizontal" / "@-gss-h") {return 0;}
+  / ("@vertical" / "@-gss-vertical" / "@-gss-v") {return 1;}
 
 
 Options
   = os:Option+  {
     var obj = {};
-    obj.chains = []
+    obj.chains = [];
     for (var i = 0; i < os.length; i++) {    
       obj[os[i].key] = os[i].value;
       // proccess chains
@@ -216,61 +217,61 @@ Options
   }
 
 Option
-  = __ chain:Chain { return chain }
-  / __ key:NameChars+ "(" value:NameChars+ ")" {return {key:key.join(''), value:value.join('')}}
+  = __ chain:Chain { return chain; }
+  / __ key:NameChars+ "(" value:NameChars+ ")" {return {key:key.join(''), value:value.join('')};}
 
 Chain 'Chain'
-  = "chain-" prop:NameChars+ preds:ChainPredicate? { return {'chain':[prop.join(""),preds]}}
+  = "chain-" prop:NameChars+ preds:ChainPredicate? { return {'chain':[prop.join(""),preds]};}
 
 ChainPredicate
-  = "(" items:ChainPredicateItems+ ")" {return items}
+  = "(" items:ChainPredicateItems+ ")" {return items;}
 
 ChainPredicateItems
-  = item:ChainPredicateItem _? ","? {return item}
+  = item:ChainPredicateItem _? ","? {return item;}
 
 // TODO: make more DRY... if all rules are optional sends parser into infinite loop
 ChainPredicateItem
   = headEq:PredEq _  value:ChainPredVal? _? tailEq:PredEq? _? s:StrengthAndWeight? {
-      return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:s}}
+      return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:s};}
   / headEq:PredEq? _? value:ChainPredVal _? tailEq:PredEq? _? s:StrengthAndWeight? {
-      return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:s}}
+      return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:s};}
   / headEq:PredEq? _? value:ChainPredVal? _? tailEq:PredEq? _? s:StrengthAndWeight {
-      return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:s}}
+      return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:s};}
 
 ChainPredVal
   = [^>=<!) ]+
 
 View
-  = "[" name:NameChars+ p:Predicate? "]"  {return {view:name.join(""),preds:p}}
-  / "|"                                   {return {view:"|"}}
+  = "[" name:NameChars+ p:Predicate? "]"  {return {view:name.join(""),preds:p};}
+  / "|"                                   {return {view:"|"};}
   // errorr 
 
 Predicate
-  = "(" preds:(PredEq PredExpression StrengthAndWeight? _? PredSeperator _?)+ ")" {return preds}
+  = "(" preds:(PredEq PredExpression StrengthAndWeight? _? PredSeperator _?)+ ")" {return preds;}
 
 PredExpression 
   = (PredOp / PredLiteral / PredVariable / PredViewVariable / PredView )+
 
 PredEq
-  = _? eq:("==" / "<=" / "<" / ">=" / ">" / "=<"{return "<=";} / "=>"{return ">=";}) _?  {return eq}
+  = _? eq:("==" / "<=" / "<" / ">=" / ">" / "=<"{return "<=";} / "=>"{return ">=";}) _?  {return eq;}
 
 PredOp 
-  = op:[+\-/*] _? {return op}
+  = op:[+\-/*] _? {return op;}
 
 PredView
-  = name:NameChars+ _? {return ["view",name.join("")]}
+  = name:NameChars+ _? {return ["view",name.join("")];}
 
 PredLiteral
-  = n:Number+ _? {return n.join("")}
+  = n:Number+ _? {return n.join("");}
 
 PredVariable
-  = "[" name:NameChars+ "]" _?  {return "[" + name.join("") + "]"}
+  = "[" name:NameChars+ "]" _?  {return "[" + name.join("") + "]";}
 
 PredViewVariable
-  = view:NameChars+ "[" prop:NameChars+ "]" _?  {return view.join("") + "[" + prop.join("") + "]"}
+  = view:NameChars+ "[" prop:NameChars+ "]" _?  {return view.join("") + "[" + prop.join("") + "]";}
 
 PredSeperator
-  = ","? {return ""}
+  = ","? {return "";}
 
 Connection
   = "-" gap:GapChars+ "-"  {return {op:"==",gap:gap.join("")};}
@@ -286,15 +287,15 @@ GapChars
   
 StrengthAndWeight
   = "!" s:([a-zA-Z]+)? w:([0-9]+)? {  return "!" + p.join(s) + p.join(w);}
-  / "!" .? {return parser.error("Invalid Strength or Weight",line,column)}
+  / "!" .? {return parser.error("Invalid Strength or Weight",line,column);}
 
 
 Strength
-  = ("require"  / "REQUIRE"  / "Require")  {return "require"}
-  / ("strong"   / "STRONG"   / "Strong")   {return "strong"}
-  / ("medium"   / "MEDIUM"   / "Medium")   {return "medium"}
-  / ("weak"     / "WEAK"     / "Weak")     {return "weak"}
-  / ("required" / "REQUIRED" / "Required") {return "require"}
+  = ("require"  / "REQUIRE"  / "Require")  {return "require";}
+  / ("strong"   / "STRONG"   / "Strong")   {return "strong";}
+  / ("medium"   / "MEDIUM"   / "Medium")   {return "medium";}
+  / ("weak"     / "WEAK"     / "Weak")     {return "weak";}
+  / ("required" / "REQUIRED" / "Required") {return "require";}
 
   
 
@@ -308,7 +309,7 @@ Literal
   = val:Number {
     return [ "number",
       val
-    ]
+    ];
   }
 
 Number
@@ -316,7 +317,7 @@ Number
 
 Integer
   = digits:[0-9]+ {
-    return parseInt(digits.join(""));
+    return parseInt(digits.join(""), 10);
   }
 
 Real
