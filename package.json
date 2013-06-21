@@ -13,7 +13,7 @@
     }
   ],
   "dependencies": {
-    "ccss-compiler": "git://github.com/the-gss/ccss-compiler.git"
+    "ccss-compiler": "*"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
