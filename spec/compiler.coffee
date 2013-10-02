@@ -4,49 +4,52 @@ if typeof process is 'object' and process.title is 'node'
 else
   compiler = require 'vfl-compiler'
 
+# full compile check
 compile = (vfl, ast) ->
   describe "with rule #{vfl}", ->
     result = null
-    it 'should be able to parse', ->
+    it 'can parse', ->
       result = compiler.parse vfl
-    it 'should produce the expected AST', ->
+    it 'produces expected', ->
       chai.expect(result).to.eql ast
+
+compile_contains = (vfl, commands) ->
+  describe "with rule #{vfl}", ->
+    result = null
+    it 'can parse', ->
+      result = compiler.parse vfl
+    it 'contains the expected', ->
+      #chai.expect(result.commands).to.include.members commands
+      r = JSON.stringify result.commands
+      for command in commands
+        chai.expect(r).to.contain JSON.stringify command
 
 describe 'VFL-to-AST Compiler', ->
 
   it 'should provide a parse method', ->
     chai.expect(compiler.parse).to.be.a 'function'
-
+  
+  # full compiled results test
   compile "@horizontal [#b1][#b2];",
     selectors: ["#b1", "#b2"]
-    vars: [
-      ["get", "#b1[right]", "right", ["$id", "b1"]]
-      ["get", "#b2[left]", "left", ["$id", "b2"]]
-    ]
-    constraints: [
+    commands: [
+      ["var", "#b1[x]", "x", ["$id", "b1"]]
+      ["var", "#b1[width]", "width", ["$id", "b1"]]
+      ['varexp', '#b1[right]', ['plus',['get','#b1[x]'],['get','#b1[width]']], ['$id','b1']]
+      ["var", "#b2[left]", "left", ["$id", "b2"]]
       ["eq", ["get", "#b1[right]"], ["get", "#b2[left]"]]
     ]
 
-  compile "@vertical [#b1]-[#b2]-[#b3]-[#b4]-[#b5];",
-    selectors: [
-      "#b1"
-      "#b2"
-      "#b3"
-      "#b4"
-      "#b5"
-    ]
-    vars: [
-      ["get", "#b1[bottom]", "bottom", ["$id", "b1"]]
-      ["get", "[vgap]", "vgap"]
-      ["get", "#b2[top]", "top", ["$id", "b2"]]
-      ["get", "#b2[bottom]", "bottom", ["$id", "b2"]]
-      ["get", "#b3[top]", "top", ["$id", "b3"]]
-      ["get", "#b3[bottom]", "bottom", ["$id", "b3"]]
-      ["get", "#b4[top]", "top", ["$id", "b4"]]
-      ["get", "#b4[bottom]", "bottom", ["$id", "b4"]]
-      ["get", "#b5[top]", "top", ["$id", "b5"]]
-    ]
-    constraints: [
+  compile_contains "@vertical [#b1]-[#b2]-[#b3]-[#b4]-[#b5];", [
+      ["var", "#b1[height]", "height", ["$id", "b1"]]
+      ["var", "[vgap]", "vgap"]
+      ["var", "#b2[top]", "top", ["$id", "b2"]]
+      ["var", "#b2[height]", "height", ["$id", "b2"]]
+      ["var", "#b3[top]", "top", ["$id", "b3"]]
+      ["var", "#b3[height]", "height", ["$id", "b3"]]
+      ["var", "#b4[top]", "top", ["$id", "b4"]]
+      ["var", "#b4[height]", "height", ["$id", "b4"]]
+      ["var", "#b5[top]", "top", ["$id", "b5"]]
       ['eq',
         ['plus', ['get', '#b1[bottom]'], ['get', '[vgap]']]
         ['get', '#b2[top]']
@@ -65,15 +68,12 @@ describe 'VFL-to-AST Compiler', ->
       ]
     ]
 
-  compile "@horizontal [#b1]-100-[#b2];",
-    selectors: ["#b1", "#b2"]
-    vars: [
-      ["get", "#b1[right]", "right", ["$id", "b1"]]
-      ["get", "#b2[left]", "left", ["$id", "b2"]]
-    ]
-    constraints: [
+  compile_contains "@horizontal [#b1]-100-[#b2];", [
+      ["var", "#b1[width]", "width", ["$id", "b1"]]
+      ["var", "#b2[left]", "left", ["$id", "b2"]]
       ["eq",
         ["plus", ["get", "#b1[right]"], ["number", 100]]
         ["get", "#b2[left]"]
       ]
     ]
+  
