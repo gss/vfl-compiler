@@ -129,14 +129,23 @@
   
   standardGapNames = ["[hgap]", "[vgap]"];
   
-  getGapString = function (g,d) {
+  getGapString = function (g,d,o) {
     if (g === undefined) {return "";}
-    if (g === "__STANDARD__") {g = standardGapNames[d];}
+    if (g === "__STANDARD__") {
+      // use gap if given with `gap()`
+      if (o.gap) {
+        g = o.gap;
+      // else use standard var
+      } else {
+        g = standardGapNames[d];
+      }
+    }
     return "+ " + g;
   };
 
-  parser.getConnectionString = function (c,d) {
-    return (getGapString(c.gap,d) + " " + c.op).trim();
+  parser.getConnectionString = function (c, d, o) {
+    
+    return (getGapString(c.gap,d,o) + " " + c.op).trim();
   };
 
   parser.getResults = function () {
@@ -189,7 +198,7 @@ VFLStatement
           result,
           view2
         ];
-        ccss = parser.getLeftVar(headView, d, o) + " " + parser.getConnectionString(connection, d) + " " + parser.getRightVar(view2, d, o) + " " + s;
+        ccss = parser.getLeftVar(headView, d, o) + " " + parser.getConnectionString(connection, d, o) + " " + parser.getRightVar(view2, d, o) + " " + s;
         parser.addC(
           ccss.trim()
         );
@@ -208,17 +217,25 @@ Options
   = os:Option+  {
     var obj = {};
     obj.chains = [];
-    for (var i = 0; i < os.length; i++) {    
-      obj[os[i].key] = os[i].value;
+    for (var i = 0; i < os.length; i++) {          
       // proccess chains
-      if (!!os[i].chain) {obj.chains.push(os[i].chain);}
+      if (!!os[i].chain) {
+        obj.chains.push(os[i].chain);
+      }
+      // or just add option
+      else {
+        obj[os[i].key] = os[i].value;
+      }            
     }
     return obj;
   }
 
 Option
   = __ chain:Chain { return chain; }
-  / __ key:NameChars+ "(" value:NameChars+ ")" {return {key:key.join(''), value:value.join('')};}
+  / __ key:NameChars+ "(" value:OpionValueChars+ ")" {return {key:key.join(''), value:value.join('')};}
+
+OpionValueChars
+  = [^>=<!)]
 
 Chain 'Chain'
   = "chain-" prop:NameChars+ preds:ChainPredicate? { return {'chain':[prop.join(""),preds]};}

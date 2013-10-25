@@ -35,7 +35,7 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
     
     parse """
-            @vertical [#b1]-[#b2]-[#b3]-[#b4]-[#b5]; // connection chain with implicit hgaps
+            @vertical [#b1]-[#b2]-[#b3]-[#b4]-[#b5]; // implicit standard gaps
           """
         ,
           [
@@ -49,7 +49,21 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
     
     parse """
-            @horizontal [#b1]-100-[#b2]-8-[#b3];
+            @vertical [#b1]-[#b2]-[#b3]-[#b4]-[#b5] gap(20); // explicit standard gaps
+          """
+        ,
+          [
+            [
+              'ccss'
+              "#b1[bottom] + 20 == #b2[top]"
+              "#b2[bottom] + 20 == #b3[top]"
+              "#b3[bottom] + 20 == #b4[top]"
+              "#b4[bottom] + 20 == #b5[top]"
+            ]
+          ]
+    
+    parse """
+            @horizontal [#b1]-100-[#b2]-8-[#b3]; // explicit gaps
           """
         ,
           [
@@ -57,6 +71,45 @@ describe 'VFL-to-CCSS Compiler', ->
               'ccss'
               "#b1[right] + 100 == #b2[left]"
               "#b2[right] + 8 == #b3[left]"              
+            ]
+          ]
+    
+    parse """
+            @horizontal [#b1][#b2]-[#b3]-100-[#b4] gap(20); // mix gaps
+          """
+        ,
+          [
+            [
+              'ccss'
+              "#b1[right] == #b2[left]"
+              "#b2[right] + 20 == #b3[left]"
+              "#b3[right] + 100 == #b4[left]"
+            ]
+          ]
+    
+    parse """
+            @horizontal [#b1]-100-[#b2]-[#b3]-[#b4] gap([col-width]); // variable standard gap
+          """
+        ,
+          [
+            [
+              'ccss'
+              "#b1[right] + 100 == #b2[left]"
+              "#b2[right] + [col-width] == #b3[left]"
+              "#b3[right] + [col-width] == #b4[left]"
+            ]
+          ]
+    
+    parse """
+            @horizontal [#b1]-100-[#b2]-[#b3]-[#b4] gap(#box1[width]); // view variable standard gap
+          """
+        ,
+          [
+            [
+              'ccss'
+              "#b1[right] + 100 == #b2[left]"
+              "#b2[right] + #box1[width] == #b3[left]"
+              "#b3[right] + #box1[width] == #b4[left]"
             ]
           ]
              
@@ -111,6 +164,18 @@ describe 'VFL-to-CCSS Compiler', ->
               'ccss'
               '#parent[left] + 1 == #sub[left]'
               '#sub[right] + 2 == #parent[right]'
+            ]
+          ]
+    
+    parse """
+            @horizontal |-[#sub]-| in(#parent) gap(100); // super view with explicit standard gaps
+          """
+        ,
+          [
+            [
+              'ccss'
+              '#parent[left] + 100 == #sub[left]'
+              '#sub[right] + 100 == #parent[right]'
             ]
           ]
   
