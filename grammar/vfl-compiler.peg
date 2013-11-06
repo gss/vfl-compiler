@@ -3,11 +3,11 @@
 
   p = parser = this;
 
-  sizeVarNames = ["width", "height"];
-  leftVarNames = ["right", "bottom"];
-  superLeftVarNames = ["left", "top"];
-  rightVarNames = ["left", "top"];
-  superRightVarNames = ["right", "bottom"];
+  sizeVarNames = p.sizeVarNames = ["width", "height"];
+  leftVarNames = p.leftVarNames = ["right", "bottom"];
+  superLeftVarNames = p.superLeftVarNames = ["left", "top"];
+  rightVarNames = p.rightVarNames = ["left", "top"];
+  superRightVarNames = p.superRightVarNames = ["right", "bottom"];
 
   cs = parser.cs = [];
 
@@ -207,6 +207,34 @@ VFLStatement
       parser.addChains(chainedViews,o);
       return {'vfl':d, o:o};
     }
+  / VFLPluralStatement
+
+VFLPluralStatement
+ = d:Dimension __ selector:NameChars+ __ o:Options? __ s:StrengthAndWeight? {
+   var ccss = "@chain ";
+   selector = selector.join("").trim();   
+   ccss += selector + " ";
+   ccss += p.leftVarNames[d] + "(";
+   if (!o) {o = {};}
+   if (o.gap) {
+     ccss += "+" + o.gap;
+   }
+   ccss += ")" + p.rightVarNames[d];
+   if (o.chains) {
+     o.chains.forEach( function (chain) {
+        ccss += " " + chain[0] + "("; 
+        if (chain[1].raw) {
+          ccss += chain[1].raw;
+        }
+        ccss += ")";
+       });
+   }
+   if (s) {
+     ccss += " " + s;
+   }
+   parser.addC(ccss);
+   return {vfl:d,o:o}
+ }
 
 Dimension
   = ("@horizontal" / "@-gss-horizontal" / "@-gss-h") {return 0;}
@@ -241,10 +269,21 @@ Chain 'Chain'
   = "chain-" prop:NameChars+ preds:ChainPredicate? { return {'chain':[prop.join(""),preds]};}
 
 ChainPredicate
-  = "(" items:ChainPredicateItems+ ")" {return items;}
+  = "(" items:ChainPredicateItems+ ")" {
+    items.raw = "";
+    items.forEach( function (item){
+      items.raw += item.raw;
+    });
+    return items;
+  }
+  / "()" {return {raw:""};}
+
 
 ChainPredicateItems
-  = item:ChainPredicateItem _? ","? {return item;}
+  = item:ChainPredicateItem _? ","? {
+    item.raw = item.headEq + item.value + item.tailEq + item.s;
+    return item;
+  }
 
 // TODO: make more DRY... if all rules are optional sends parser into infinite loop
 ChainPredicateItem

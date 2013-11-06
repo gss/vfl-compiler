@@ -374,6 +374,66 @@ describe 'VFL-to-CCSS Compiler', ->
               '#b1[width] >= 50 <= #b2[width] !weak10'
             ]
           ]
+  
+  # Plural selectors
+  # --------------------------------------------------
+  
+  describe '/* Plural selectors */', ->
+    
+    parse """
+            @vertical .box;
+          """
+        ,
+          [
+            [
+              'ccss',
+              '@chain .box bottom()top'
+            ]
+          ]
+    
+    parse """
+            @horizontal .box chain-width chain-height();
+          """
+        ,
+          [
+            [
+              'ccss',
+              '@chain .box right()left width() height()'
+            ]
+          ]
+    
+    parse """
+            @horizontal .box gap(20);
+          """
+        ,
+          [
+            [
+              'ccss',
+              '@chain .box right(+20)left'
+            ]
+          ]
+    
+    parse """
+            @vertical .super-box gap([vgap]);
+          """
+        ,
+          [
+            [
+              'ccss',
+              '@chain .super-box bottom(+[vgap])top'
+            ]
+          ]
+    
+    parse """
+            @vertical .super-box gap([vgap]) chain-center-x(::window[center-x] !medium100) !strong;
+          """
+        ,
+          [
+            [
+              'ccss',
+              '@chain .super-box bottom(+[vgap])top center-x(::window[center-x]!medium100) !strong'
+            ]
+          ]
 
     
     
