@@ -2,7 +2,9 @@
   var p, parser, cs, leftVarNames, superLeftVarNames, rightVarNames, superRightVarNames, standardGapNames, getSuperViewName, getGapString, sizeVarNames; 
 
   p = parser = this;
-
+  
+  
+  p.trickleDownOptions = ["name"];
   sizeVarNames = p.sizeVarNames = ["width", "height"];
   leftVarNames = p.leftVarNames = ["right", "bottom"];
   superLeftVarNames = p.superLeftVarNames = ["left", "top"];
@@ -86,7 +88,9 @@
             }
           }
           if (views.length > 1) {
-             ccss += " " + views[views.length-1] + "[" + prop + "]" + " " + pred.s;
+             ccss += " " + views[views.length-1] + "[" + prop + "]";
+             ccss += p.getTrailingOptions(o);
+             ccss += " " + pred.s;
              cs.push(ccss.trim());
           }
         }
@@ -147,6 +151,25 @@
     
     return (getGapString(c.gap,d,o) + " " + c.op).trim();
   };
+  
+    
+  p.getTrailingOptions = function (o) {
+    var string = "";    
+    p.trickleDownOptions.forEach(function(key){
+      if (o[key] != null) {
+        string = string + " " + key + "(" + o[key] + ")";
+      }
+    });
+    return string;
+  };
+  
+  p.getSW = function (o) {
+    if (o.sw) {
+      return " " + o.sw.trim();
+    }
+    return "";
+  };
+  
 
   parser.getResults = function () {
     return [
@@ -166,6 +189,7 @@
     if (a.join){return a.join("");}
     return a;
   };
+  
 }
 
 start
@@ -179,8 +203,7 @@ Statement
 
 VFLStatement
   = d:Dimension __ head:View
-    tail:(__ Connection? __ View)* __ o:Options?
-    __ s:StrengthAndWeight?         {
+    tail:(__ Connection? __ View)* __ o:Options? {
       var connection, view2, result, ccss, headView, chainedViews;      
       result = head;      
       headView = head.view;
@@ -198,7 +221,11 @@ VFLStatement
           result,
           view2
         ];
-        ccss = parser.getLeftVar(headView, d, o) + " " + parser.getConnectionString(connection, d, o) + " " + parser.getRightVar(view2, d, o) + " " + s;
+        ccss = p.getLeftVar(headView, d, o) + " " 
+          + p.getConnectionString(connection, d, o) + " " 
+          + p.getRightVar(view2, d, o)   
+          + p.getTrailingOptions(o)
+          + p.getSW(o);
         parser.addC(
           ccss.trim()
         );
@@ -229,10 +256,9 @@ VFLPluralStatement
         ccss += ")";
        });
    }
-   if (s) {
-     ccss += " " + s;
-   }
-   parser.addC(ccss);
+   ccss += p.getTrailingOptions(o);
+   ccss += p.getSW(o);
+   parser.addC(ccss.trim());
    return {vfl:d,o:o}
  }
 
@@ -258,9 +284,10 @@ Options
     return obj;
   }
 
-Option
+Option 'Option'
   = __ chain:Chain { return chain; }
   / __ key:NameChars+ "(" value:OpionValueChars+ ")" {return {key:key.join(''), value:value.join('')};}
+  / __ sw:StrengthAndWeight {return {key:"sw",value:sw}; }
 
 OpionValueChars
   = [^>=<!)]
@@ -268,7 +295,7 @@ OpionValueChars
 Chain 'Chain'
   = "chain-" prop:NameChars+ preds:ChainPredicate? { return {'chain':[prop.join(""),preds]};}
 
-ChainPredicate
+ChainPredicate 'ChainPredicate'
   = "(" items:ChainPredicateItems+ ")" {
     items.raw = "";
     items.forEach( function (item){
@@ -302,7 +329,7 @@ View
   / "|"                                   {return {view:"|"};}
   // errorr 
 
-Predicate
+Predicate 'Predicate'
   = "(" preds:(PredEq PredExpression StrengthAndWeight? _? PredSeperator _?)+ ")" {return preds;}
 
 PredExpression 
@@ -342,7 +369,11 @@ GapChars
 
   
 StrengthAndWeight
-  = "!" s:([a-zA-Z]+)? w:([0-9]+)? {  return "!" + p.join(s) + p.join(w);}
+  = "!" s:([a-zA-Z]+)? w:([0-9]+)? { 
+    var val;
+    val = "!" + p.join(s) + p.join(w);
+    return val.trim();
+  }
   / "!" .? {return parser.error("Invalid Strength or Weight",line,column);}
 
 Strength

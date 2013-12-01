@@ -434,6 +434,64 @@ describe 'VFL-to-CCSS Compiler', ->
               '@chain .super-box bottom(+[vgap])top center-x(::window[center-x]!medium100) !strong'
             ]
           ]
+  
+  
+  # Names
+  # --------------------------------------------------
+  
+  describe '/* Names */', ->
+    
+    parse """
+            @horizontal [#b1]-100-[#b2]-[#b3]-[#b4] gap(#box1[width]) name(button-layout) !strong; // view variable standard gap
+          """
+        ,
+          [
+            [
+              'ccss'
+              "#b1[right] + 100 == #b2[left] name(button-layout) !strong"
+              "#b2[right] + #box1[width] == #b3[left] name(button-layout) !strong"
+              "#b3[right] + #box1[width] == #b4[left] name(button-layout) !strong"
+            ]
+          ]
+    
+    parse """
+            @horizontal [#b1]-100-[#b2]-[#b3]-[#b4] gap(#box1[width]) !strong name(button-layout); // view variable standard gap
+          """
+        ,
+          [
+            [
+              'ccss'
+              "#b1[right] + 100 == #b2[left] name(button-layout) !strong"
+              "#b2[right] + #box1[width] == #b3[left] name(button-layout) !strong"
+              "#b3[right] + #box1[width] == #b4[left] name(button-layout) !strong"
+            ]
+          ]
+    
+    parse """
+            @vertical [#b1][#b2][#b3][#b4] chain-width(==) chain-height(<=150>=!required) name(bob) !medium; // explicit equality & inequality chains
+          """
+        ,
+          [
+            [
+              'ccss'
+              '#b1[bottom] == #b2[top] name(bob) !medium'
+              '#b2[bottom] == #b3[top] name(bob) !medium'
+              '#b3[bottom] == #b4[top] name(bob) !medium'
+              '#b1[width] == #b2[width] == #b3[width] == #b4[width] name(bob)'
+              '#b1[height] <= 150 >= #b2[height] <= 150 >= #b3[height] <= 150 >= #b4[height] name(bob) !required'
+            ]
+          ]
+    
+    parse """
+            @vertical .super-box gap([vgap]) chain-center-x(::window[center-x] !medium100) name(frank) !strong;
+          """
+        ,
+          [
+            [
+              'ccss',
+              '@chain .super-box bottom(+[vgap])top center-x(::window[center-x]!medium100) name(frank) !strong'
+            ]
+          ]
 
     
     
