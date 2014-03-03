@@ -175,9 +175,7 @@
   
 
   parser.getResults = function () {
-    return [
-      ["ccss"].concat(this.cs)
-    ];
+    return this.cs;
   };
 
   parser.error = function (m,l,c) {
