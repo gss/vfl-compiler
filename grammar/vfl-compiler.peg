@@ -108,13 +108,14 @@
   parser.getLeftVar = function (view, dimension, o) {
     var varName;
     if (view === "|") {
-      view = getSuperViewName(o);
+      viewName = getSuperViewName(o);
       varName = superLeftVarNames[dimension];
     }
     else {
+      viewName = view;
       varName = leftVarNames[dimension];
     }
-    return view + "[" + varName + "]";
+    return viewName + "[" + varName + "]";
   };
   
   parser.getRightVar = function (view, dimension, o) {
@@ -133,11 +134,13 @@
   
   standardGapNames = ["[hgap]", "[vgap]"];
   
-  getGapString = function (g,d,o) {
+  getGapString = function (g,d,o,withContainer) {
     if (g === undefined) {return "";}
     if (g === "__STANDARD__") {
-      // use gap if given with `gap()`
-      if (o.gap) {
+      // use gap if given with `gap()` or `outer-gap`
+      if (withContainer && o['outer-gap']) {
+        g = o['outer-gap'];
+      } else if (o.gap) {
         g = o.gap;
       // else use standard var
       } else {
@@ -147,9 +150,9 @@
     return "+ " + g;
   };
 
-  parser.getConnectionString = function (c, d, o) {
+  parser.getConnectionString = function (c, d, o, withContainer) {
     
-    return (getGapString(c.gap,d,o) + " " + c.op).trim();
+    return (getGapString(c.gap,d,o,withContainer) + " " + c.op).trim();
   };
   
     
@@ -204,7 +207,7 @@ Statement
 VFLStatement
   = d:Dimension __ head:View
     tail:(__ Connection? __ View)* __ o:Options? {
-      var connection, view2, result, ccss, headView, chainedViews;      
+      var connection, view2, result, ccss, headView, chainedViews, withContainer;      
       result = head;      
       headView = head.view;
       chainedViews = [];      
@@ -221,8 +224,9 @@ VFLStatement
           result,
           view2
         ];
+        withContainer = ( headView =="|" || view2 === "|");
         ccss = p.getLeftVar(headView, d, o) + " " 
-          + p.getConnectionString(connection, d, o) + " " 
+          + p.getConnectionString(connection, d, o, withContainer) + " " 
           + p.getRightVar(view2, d, o)   
           + p.getTrailingOptions(o)
           + p.getSW(o);

@@ -178,6 +178,33 @@ describe 'VFL-to-CCSS Compiler', ->
               '#sub[right] + 100 == #parent[right]'
             ]
           ]
+    
+    parse """
+            @horizontal |-[#sub1]-[#sub2]-| in(#parent) outer-gap(10); // outer-gap
+          """
+        ,
+          [
+            [
+              'ccss'
+              '#parent[left] + 10 == #sub1[left]'
+              '#sub1[right] + [hgap] == #sub2[left]'          
+              '#sub2[right] + 10 == #parent[right]'
+            ]
+          ]
+    
+    parse """
+            @horizontal |-[#sub1]-[#sub2]-| in(#parent) gap(8) outer-gap([baseline]); // outer-gap
+          """
+        ,
+          [
+            [
+              'ccss'
+              '#parent[left] + [baseline] == #sub1[left]'
+              '#sub1[right] + 8 == #sub2[left]'          
+              '#sub2[right] + [baseline] == #parent[right]'
+            ]
+          ]
+    
   
   # Cushions
   # --------------------------------------------------
