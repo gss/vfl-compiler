@@ -32,7 +32,7 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
     
     parse """
-            @h [#b1][#b2]; // simple connection
+            @h [#b1][#b2]; // shorthand
           """
         ,
           [
@@ -40,7 +40,7 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
     
     parse """
-            @v [#b1][#b2]; // simple connection
+            @v [#b1][#b2]; // shorthand
           """
         ,
           [
