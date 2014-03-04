@@ -5,7 +5,7 @@ This library compiles [GSS-flavored VFL](http://gridstylesheets.org/guides/vfl/)
 
 ## Background
 
-Language specs inspired by Apple's [Visual Forma Language](https://developer.apple.com/library/ios/documentation/userexperience/conceptual/AutolayoutPG/VisualFormatLanguage/VisualFormatLanguage.html) (VFL) as used in [Cocoa Auto Layout](http://developer.apple.com/library/ios/#documentation/UserExperience/Conceptual/AutolayoutPG/Articles/formatLanguage.html), and Greg Badros's [Constraint CSS](http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.101.4819) (CCSS).
+Language specs inspired by Apple's [Visual Format Language](https://developer.apple.com/library/ios/documentation/userexperience/conceptual/AutolayoutPG/VisualFormatLanguage/VisualFormatLanguage.html) (VFL) and Greg Badros's [Constraint CSS](http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.101.4819) (CCSS).
 
 
 ## Documentation
