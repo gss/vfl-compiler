@@ -265,8 +265,8 @@ VFLPluralStatement
  }
 
 Dimension
-  = ("@horizontal" / "@-gss-horizontal" / "@-gss-h") {return 0;}
-  / ("@vertical" / "@-gss-vertical" / "@-gss-v") {return 1;}
+  = ("@horizontal" / "@-gss-horizontal" / "@-gss-h" / "@h") {return 0;}
+  / ("@vertical" / "@-gss-vertical" / "@-gss-v" / "@v") {return 1;}
 
 
 Options

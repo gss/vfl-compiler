@@ -32,6 +32,22 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
     
     parse """
+            @h [#b1][#b2]; // simple connection
+          """
+        ,
+          [
+            "#b1[right] == #b2[left]"
+          ]
+    
+    parse """
+            @v [#b1][#b2]; // simple connection
+          """
+        ,
+          [
+            "#b1[bottom] == #b2[top]"
+          ]
+    
+    parse """
             @vertical [#b1]-[#b2]-[#b3]-[#b4]-[#b5]; // implicit standard gaps
           """
         ,
