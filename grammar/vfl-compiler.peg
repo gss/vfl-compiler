@@ -386,7 +386,7 @@ Strength
   / ("required" / "REQUIRED" / "Required") {return "require";}
   
 NameChars
-  = [a-zA-Z0-9#.\-_$:]
+  = [a-zA-Z0-9#.\-_$:""]
 
 NameCharsWithSpace
   = NameChars / " "

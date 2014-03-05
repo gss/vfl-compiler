@@ -107,12 +107,46 @@ describe 'VFL-to-CCSS Compiler', ->
             "#b2[right] + #box1[width] == #b3[left]"
             "#b3[right] + #box1[width] == #b4[left]"
           ]
-             
+    
+    parse """
+            @vertical ["Zone"]-["1"]-["a"]-["q-1"]-["_fallout"]; // virtuals
+          """
+        ,
+          [
+            '"Zone"[bottom] + [vgap] == "1"[top]'
+            '"1"[bottom] + [vgap] == "a"[top]'
+            '"a"[bottom] + [vgap] == "q-1"[top]'
+            '"q-1"[bottom] + [vgap] == "_fallout"[top]'
+          ]
+  
+
+    
+    
+  
+     
   # Containment
   # --------------------------------------------------
   
   describe '/* Containment */', ->
     
+    parse """
+            @vertical |[#sub]| in(#parent); // flush with super view
+          """
+        ,
+          [
+            '#parent[top] == #sub[top]'
+            '#sub[bottom] == #parent[bottom]'          
+          ]
+    
+    parse """
+            @vertical |["sub"]| in("parent"); // virtuals
+          """
+        ,
+          [
+            '"parent"[top] == "sub"[top]'
+            '"sub"[bottom] == "parent"[bottom]'          
+          ]
+          
     parse """
             @vertical |[#sub]| in(#parent); // flush with super view
           """
@@ -243,6 +277,16 @@ describe 'VFL-to-CCSS Compiler', ->
             '#b2[width] == #b1[width]'
             '#b1[right] == #b2[left]'
           ]
+    
+    parse """
+            @horizontal ["b1"(<=100)]["b2"(=="b1")]; // virtuals
+          """
+        ,
+          [
+            '"b1"[width] <= 100'
+            '"b2"[width] == "b1"[width]'
+            '"b1"[right] == "b2"[left]'
+          ]
           
     parse """
             @horizontal [#b1( <=100 , ==#b99 !99 )][#b2(>= #b1 *2  !weak10, <=3!required)]-100-[.b3(==200)] !medium200; // multiple, connected predicates w/ strength & weight
@@ -333,6 +377,17 @@ describe 'VFL-to-CCSS Compiler', ->
             '#b1[centerX] == #panel[centerX] == #b2[centerX] !required'
             '#b1[width] >= 50 <= #b2[width] !weak10'
           ]
+    
+    parse """
+            @vertical |-[#b1]-[#b2]-| in("panel") gap("zone"[col-size]) outer-gap("outer-zone"[row-size]) chain-centerX( "panel"[centerX] !required); // adv w/ virtuals
+          """
+        ,
+          [
+            '"panel"[top] + "outer-zone"[row-size] == #b1[top]'
+            '#b1[bottom] + "zone"[col-size] == #b2[top]'
+            '#b2[bottom] + "outer-zone"[row-size] == "panel"[bottom]'              
+            '#b1[centerX] == "panel"[centerX] == #b2[centerX] !required'
+          ]
   
   # Plural selectors
   # --------------------------------------------------
@@ -378,7 +433,7 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '@chain .super-box bottom(+[vgap])top center-x(::window[center-x]!medium100) !strong'
           ]
-  
+      
   
   # Names
   # --------------------------------------------------
