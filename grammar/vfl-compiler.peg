@@ -326,7 +326,7 @@ ChainPredicateItem
 ChainPredVal
   = [^>=<!) ]+
 
-View
+View "VFL Element"
   = "[" name:NameChars+ p:Predicate? "]"  {return {view:name.join(""),preds:p};}
   / "|"                                   {return {view:"|"};}
   // errorr 
@@ -334,7 +334,7 @@ View
 Predicate 'Predicate'
   = "(" preds:(PredEq PredExpression StrengthAndWeight? _? PredSeperator _?)+ ")" {return preds;}
 
-PredExpression 
+PredExpression "Predicate Expression"
   = (PredOp / PredLiteral / PredVariable / PredViewVariable / PredView )+
 
 PredEq
@@ -358,7 +358,7 @@ PredViewVariable
 PredSeperator
   = ","? {return "";}
 
-Connection
+Connection "VFL Connection"
   = "-" gap:GapChars+ "-"  {return {op:"==",gap:gap.join("")};}
   / "-"                    {return {op:"==",gap:"__STANDARD__"};}
   / "~" gap:GapChars+ "~"  {return {op:"<=",gap:gap.join("")};}
@@ -366,11 +366,11 @@ Connection
   / "~"                    {return {op:"<="};}
   / ""                     {return {op:"=="};}
 
-GapChars 
+GapChars "VFL Connection Gap"
   = [a-zA-Z0-9#._$]
 
   
-StrengthAndWeight
+StrengthAndWeight "Strength / Weight"
   = "!" s:([a-zA-Z]+)? w:([0-9]+)? { 
     var val;
     val = "!" + p.join(s) + p.join(w);
