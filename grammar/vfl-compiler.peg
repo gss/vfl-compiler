@@ -106,7 +106,7 @@
   };
 
   parser.getLeftVar = function (view, dimension, o) {
-    var varName;
+    var varName, viewName;
     if (view === "|") {
       viewName = getSuperViewName(o);
       varName = superLeftVarNames[dimension];
