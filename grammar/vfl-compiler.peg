@@ -105,9 +105,12 @@
     return o.in;
   };
 
-  parser.getLeftVar = function (view, dimension, o) {
+  parser.getLeftVar = function (view, dimension, o, viewObj) {
     var varName, viewName;
-    if (view === "|") {
+    if (viewObj.isPoint) {
+      return viewObj.pos;
+    }
+    else if (view === "|") {
       viewName = getSuperViewName(o);
       varName = superLeftVarNames[dimension];
     }
@@ -118,10 +121,12 @@
     return viewName + "[" + varName + "]";
   };
   
-  parser.getRightVar = function (view, dimension, o) {
+  parser.getRightVar = function (view, dimension, o, viewObj) {
     var varName;
-    
-    if (view === "|") {
+    if (viewObj.isPoint) {
+      return viewObj.pos;
+    }
+    else if (view === "|") {
       view = getSuperViewName(o);
       varName = superRightVarNames[dimension];
     }
@@ -185,10 +190,42 @@
     console.error(m);
     return m;
   };
+  
+  
+  p.flatten = function (array, isShallow) {
+    
+    if (typeof array === "string") {return array;}
+    
+    var index = -1,
+      length = array ? array.length : 0,
+      result = [];
 
-  parser.join = function (a) {
+    while (++index < length) {
+      var value = array[index];
+
+      if (value instanceof Array) {
+        Array.prototype.push.apply(result, isShallow ? value : p.flatten(value));
+      }
+      else {
+        result.push(value);
+      }
+    }
+    return result;
+  }
+
+  p.trim = function (x) {
+    if (typeof x === "string") {return x.trim();}
+    if (x instanceof Array) {return x.join("").trim();}
+    return ""
+  };
+
+  p.join = function (a) {
     if (a.join){return a.join("");}
     return a;
+  };
+  
+  p.stringify = function (array) {
+    return p.trim(p.join(p.flatten(array)));
   };
   
 }
@@ -205,33 +242,38 @@ Statement
 VFLStatement
   = d:Dimension __ head:View
     tail:(__ Connection? __ View)* __ o:Options? {
-      var connection, view2, result, ccss, headView, chainedViews, withContainer;      
+      var connection, result, ccss, chainedViews, withContainer,
+        tailView, tailViewObj, headView, headViewObj;      
       result = head;      
-      headView = head.view;
+      headViewObj = head;
+      headView = headViewObj.view;      
       chainedViews = [];      
       if (headView !== "|") {chainedViews.push(headView);}
       parser.addPreds(headView,head.preds,d);      
       for (var i = 0; i < tail.length; i++) {        
         connection = tail[i][1];
-        view2 = tail[i][3].view;
-        if (view2 !== "|") {chainedViews.push(view2);}
-        parser.addPreds(view2,tail[i][3].preds,d);
+        tailViewObj = tail[i][3]
+        tailView = tailViewObj.view;        
+        if (tailView !== "|") {chainedViews.push(tailView);}
+        parser.addPreds(tailView,tail[i][3].preds,d);
         result = [
           //"c",
           connection,
           result,
-          view2
+          tailView
         ];
-        withContainer = ( headView =="|" || view2 === "|");
-        ccss = p.getLeftVar(headView, d, o) + " " 
-          + p.getConnectionString(connection, d, o, withContainer) + " " 
-          + p.getRightVar(view2, d, o)   
-          + p.getTrailingOptions(o)
-          + p.getSW(o);
-        parser.addC(
-          ccss.trim()
-        );
-        headView = view2;
+        if (!(headViewObj.isPoint && tailViewObj.isPoint)) {
+          withContainer = ( headView =="|" || tailView === "|");
+          ccss = p.getLeftVar(headView, d, o, headViewObj) + " " 
+            + p.getConnectionString(connection, d, o, withContainer) + " " 
+            + p.getRightVar(tailView, d, o, tailViewObj)   
+            + p.getTrailingOptions(o)
+            + p.getSW(o);
+          parser.addC(
+            ccss.trim()
+        );}
+        headViewObj = tailViewObj;
+        headView = tailView;
       }
       parser.addChains(chainedViews,o);
       return {'vfl':d, o:o};
@@ -327,9 +369,18 @@ ChainPredVal
   = [^>=<!) ]+
 
 View "VFL Element"
-  = "[" name:NameChars+ p:Predicate? "]"  {return {view:name.join(""),preds:p};}
+  = "[" name:NameChars+ pred:Predicate? "]" 
+    {return {view:p.stringify(name),preds:pred};}   
+  / "|" name:([^~\-] NameChars+) pred:Predicate? "|" 
+    {return {view:p.stringify(name),preds:pred};}
+  /  point:Point       {return {view:"|", isPoint:true, pos:point};}
   / "|"                                   {return {view:"|"};}
   // errorr 
+
+Point "Point" 
+  = "<" _? position:[^>]+ _? ">" {
+    return p.stringify(position);
+  }
 
 Predicate 'Predicate'
   = "(" preds:(PredEq PredExpression StrengthAndWeight? _? PredSeperator _?)+ ")" {return preds;}

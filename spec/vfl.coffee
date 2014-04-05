@@ -124,10 +124,10 @@ describe 'VFL-to-CCSS Compiler', ->
     
   
      
-  # Containment
+  # Element Containment
   # --------------------------------------------------
   
-  describe '/* Containment */', ->
+  describe '/* Element Containment */', ->
     
     parse """
             @vertical |[#sub]| in(#parent); // flush with super view
@@ -147,17 +147,9 @@ describe 'VFL-to-CCSS Compiler', ->
             '"sub"[bottom] == "parent"[bottom]'          
           ]
           
-    parse """
-            @vertical |[#sub]| in(#parent); // flush with super view
-          """
-        ,
-          [
-            '#parent[top] == #sub[top]'
-            '#sub[bottom] == #parent[bottom]'          
-          ]
     
     parse """
-            @vertical |[#sub]|; // super view defaults to ::this
+            @v |[#sub]|; // super view defaults to ::this
           """
         ,
           [
@@ -176,7 +168,7 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
     
     parse """
-            @horizontal |-1-[#sub]-2-| in(#parent); // super view with explicit gaps
+            @h |-1-[#sub]-2-| in(#parent); // super view with explicit gaps
           """
         ,
           [
@@ -185,7 +177,7 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
     
     parse """
-            @horizontal |-[#sub]-| in(#parent) gap(100); // super view with explicit standard gaps
+            @horizontal |-|#sub|-| in(#parent) gap(100); // super view with explicit standard gaps
           """
         ,
           [
@@ -212,7 +204,70 @@ describe 'VFL-to-CCSS Compiler', ->
             '#sub1[right] + 8 == #sub2[left]'          
             '#sub2[right] + [baseline] == #parent[right]'
           ]
+  
+
     
+    
+  
+     
+  # Points
+  # --------------------------------------------------
+  
+  describe '/* Points */', ->
+    
+    parse """
+            @v <100>[#sub]<300>; // point containment
+          """
+        ,
+          [
+            '100 == #sub[top]'
+            '#sub[bottom] == 300'          
+          ]
+    
+    parse """
+            @h < "col1"[center-x] + 20 >-[#box1]-< ::window[center-x] >; // point containment
+          """
+        ,
+          [
+            '"col1"[center-x] + 20 + [hgap] == #box1[left]'
+            '#box1[right] + [hgap] == ::window[center-x]'          
+          ]
+          
+    parse """
+            @h < [line] >-[#box1]-[#box2]; // point containment
+          """
+        ,
+          [
+            '[line] + [hgap] == #box1[left]'
+            '#box1[right] + [hgap] == #box2[left]'
+          ]
+    
+    parse """
+            @h [#btn1]-<::window[center-x]>-[#btn2] gap(8); // point in alignment
+          """
+        ,
+          [
+            '#btn1[right] + 8 == ::window[center-x]'
+            '::window[center-x] + 8 == #btn2[left]'          
+          ]
+          
+    parse """
+            @h [#btn1]-<"col3"[left]> 
+                       <"col4"[right]>-[#btn2] 
+              gap(8); 
+              // consecutive points
+          """
+        ,
+          [
+            '#btn1[right] + 8 == "col3"[left]'
+            '"col4"[right] + 8 == #btn2[left]'          
+          ]
+    
+      
+    
+
+          
+            
   
   # Cushions
   # --------------------------------------------------
