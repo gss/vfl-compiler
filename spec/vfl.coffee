@@ -255,7 +255,7 @@ describe 'VFL-to-CCSS Compiler', ->
             @h [#btn1]-<"col3"[left]> 
                        <"col4"[right]>-[#btn2] 
               gap(8); 
-              // consecutive points
+              // consecutive points are not equalized
           """
         ,
           [
