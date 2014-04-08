@@ -250,6 +250,17 @@ describe 'VFL-to-CCSS Compiler', ->
             '#btn1[right] + 8 == ::window[center-x]'
             '::window[center-x] + 8 == #btn2[left]'          
           ]
+    
+    parse """
+            @h [#btn1]-<::window[center-x]>-[#btn2] gap(8) chain-top chain-width(==); // chains ignore points
+          """
+        ,
+          [
+            '#btn1[right] + 8 == ::window[center-x]'
+            '::window[center-x] + 8 == #btn2[left]'
+            '#btn1[top] == #btn2[top]'
+            '#btn1[width] == #btn2[width]'
+          ]
           
     parse """
             @h [#btn1]-<"col3"[left]> 
