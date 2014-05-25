@@ -1,11 +1,11 @@
-if typeof process is 'object' and process.title is 'node'
+if window?
+  parser = require 'vfl-compiler/lib/vfl-compiler.js'
+else
   chai = require 'chai' unless chai
   parser = require '../lib/vfl-compiler'
-else
-  parser = require 'vfl-compiler/lib/vfl-compiler.js'
 
 parse = (source, expect) ->
-  result = null
+  result = null  
   describe source, ->
     it 'should do something', ->
       result = parser.parse source
@@ -483,6 +483,16 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '@chain .box right(+20)left'
           ]
+    
+    ### TODO
+    parse """
+            @horizontal .box gap(20) in("area");
+          """
+        ,
+          [
+            '@chain .box ("area"[left])right(+20)left("area"[right])'
+          ]
+    ###
     
     parse """
             @vertical .super-box gap([vgap]);

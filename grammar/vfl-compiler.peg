@@ -32,7 +32,9 @@
           }
           ccss += exp + " ";
         }
-        ccss += pred[2]; // strength & weight
+        if (pred[2]) {
+          ccss += pred[2];
+        } // strength & weight
         cs.push(ccss.trim());
       }
     }
@@ -56,14 +58,15 @@
   parser.addChains = function (views,o) {
     var chains, chain, prop, preds, connector, ccss, view, pred;
     chains = o.chains;
-    if (chains) {            
+    if (chains) {     
       for (var i = 0; i < chains.length; i++) {
         chain = chains[i];
         prop = chain[0];
         preds = chain[1];
-        if (preds === "") {
+        if (preds === "" || !preds) {
+          // load default chain predicate
           preds = [parser.defaultChainObject];
-        } // load default chain predicate
+        } 
         for (var j = 0; j < preds.length; j++) {
           pred = preds[j];
           ccss = "";
@@ -82,7 +85,7 @@
                 ccss += " " + pred.tailEq;
               }
               else {
-                ccss += " " + pred.s;
+                ccss += " " + pred.s;                
                 cs.push(ccss.trim());
               }
             }
@@ -159,15 +162,16 @@
     
     return (getGapString(c.gap,d,o,withContainer) + " " + c.op).trim();
   };
-  
-    
+      
   p.getTrailingOptions = function (o) {
-    var string = "";    
-    p.trickleDownOptions.forEach(function(key){
-      if (o[key] != null) {
-        string = string + " " + key + "(" + o[key] + ")";
-      }
-    });
+    var string = "";
+    if (o) {
+      p.trickleDownOptions.forEach(function(key){
+        if (o[key] != null) {
+          string = string + " " + key + "(" + o[key] + ")";
+        }
+      });
+    }
     return string;
   };
   
@@ -220,11 +224,13 @@
   };
 
   p.join = function (a) {
+    if (!a) {return "";}
     if (a.join){return a.join("");}
     return a;
   };
   
   p.stringify = function (array) {
+    if (!array) {return "";}
     return p.trim(p.join(p.flatten(array)));
   };
   
@@ -241,7 +247,7 @@ Statement
 
 VFLStatement
   = d:Dimension __ head:View
-    tail:(__ Connection? __ View)* __ o:Options? {
+    tail:(__ Connection? __ View)* __ o:Options {
       var connection, result, ccss, chainedViews, withContainer,
         tailView, tailViewObj, headView, headViewObj;      
       result = head;      
@@ -281,12 +287,11 @@ VFLStatement
   / VFLPluralStatement
 
 VFLPluralStatement
- = d:Dimension __ selector:NameChars+ __ o:Options? __ s:StrengthAndWeight? {
+ = d:Dimension __ selector:NameChars+ __ o:Options __ s:StrengthAndWeight? {
    var ccss = "@chain ";
    selector = selector.join("").trim();   
    ccss += selector + " ";
    ccss += p.leftVarNames[d] + "(";
-   if (!o) {o = {};}
    if (o.gap) {
      ccss += "+" + o.gap;
    }
@@ -294,8 +299,10 @@ VFLPluralStatement
    if (o.chains) {
      o.chains.forEach( function (chain) {
         ccss += " " + chain[0] + "("; 
-        if (chain[1].raw) {
-          ccss += chain[1].raw;
+        if (chain[1]) {
+          if (chain[1].raw) {
+            ccss += chain[1].raw;
+          }
         }
         ccss += ")";
        });
@@ -312,7 +319,7 @@ Dimension
 
 
 Options
-  = os:Option+  {
+  = os:Option*  {
     var obj = {};
     obj.chains = [];
     for (var i = 0; i < os.length; i++) {          
@@ -359,11 +366,11 @@ ChainPredicateItems
 // TODO: make more DRY... if all rules are optional sends parser into infinite loop
 ChainPredicateItem
   = headEq:PredEq _  value:ChainPredVal? _? tailEq:PredEq? _? s:StrengthAndWeight? {
-      return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:s};}
+      return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:p.join(s)};}
   / headEq:PredEq? _? value:ChainPredVal _? tailEq:PredEq? _? s:StrengthAndWeight? {
-      return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:s};}
+      return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:p.join(s)};}
   / headEq:PredEq? _? value:ChainPredVal? _? tailEq:PredEq? _? s:StrengthAndWeight {
-      return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:s};}
+      return {headEq:p.join(headEq),value:p.join(value),tailEq:p.join(tailEq),s:p.join(s)};}
 
 ChainPredVal
   = [^>=<!) ]+

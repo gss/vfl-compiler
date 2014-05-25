@@ -5,9 +5,9 @@ module.exports = ->
 
     # Generate library from Peg grammar
     peg:
-      fbp:
-        grammar: 'grammar/vfl-compiler.peg'
-        outputFile: 'lib/vfl-compiler.js'
+      parser:
+        src: 'grammar/vfl-compiler.peg'
+        dest: 'lib/vfl-compiler.js'
 
     # Build the browser Component
     component:
@@ -71,6 +71,6 @@ module.exports = ->
   @loadNpmTasks 'grunt-mocha-phantomjs'
   @loadNpmTasks 'grunt-contrib-watch'
 
-  @registerTask 'build', ['peg', 'component', 'component_build', 'uglify']
-  @registerTask 'test', ['build', 'jshint', 'coffee', 'cafemocha', 'mocha_phantomjs']
+  @registerTask 'build', ['peg', 'component', 'component_build', 'uglify', 'coffee']
+  @registerTask 'test', ['build', 'jshint', 'cafemocha', 'mocha_phantomjs']
   @registerTask 'default', ['build']
