@@ -3,6 +3,8 @@
 
   p = parser = this;
   
+  var ErrorReporter = require('error-reporter');
+  p.errorReporter = new ErrorReporter(input);
   
   p.trickleDownOptions = ["name"];
   sizeVarNames = p.sizeVarNames = ["width", "height"];
@@ -186,15 +188,6 @@
   parser.getResults = function () {
     return this.cs;
   };
-
-  parser.error = function (m,l,c) {
-    if (!!l && !!c) {
-      m = m + " {line:" + l + ", col:" + c + "}";
-    }
-    console.error(m);
-    return m;
-  };
-  
   
   p.flatten = function (array, isShallow) {
     
@@ -434,7 +427,9 @@ StrengthAndWeight "Strength / Weight"
     val = "!" + p.join(s) + p.join(w);
     return val.trim();
   }
-  / "!" .? {return parser.error("Invalid Strength or Weight",line,column);}
+  / "!" .? {
+    return p.errorReporter.reportError('Invalid Strength or Weight', line(), column());
+  }
 
 Strength
   = ("require"  / "REQUIRE"  / "Require")  {return "require";}

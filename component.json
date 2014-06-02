@@ -6,5 +6,8 @@
     "lib/vfl-compiler.js",
     "lib/compiler.js"
   ],
+  "dependencies": {
+    "the-gss/error-reporter": "*"
+  },
   "main": "lib/compiler.js"
 }

@@ -13,6 +13,12 @@ parse = (source, expect) ->
     it 'should match expected', ->
       chai.expect(result).to.eql expect
 
+expectError = (source, message) ->
+  describe source, ->
+    it "should throw an error with message: #{message}", ->
+      exercise = -> parser.parse source
+      chai.expect(exercise).to.throw Error, message
+
 describe 'VFL-to-CCSS Compiler', ->
   
   it 'should provide a parse method', ->
@@ -556,6 +562,10 @@ describe 'VFL-to-CCSS Compiler', ->
             '@chain .super-box bottom(+[vgap])top center-x(::window[center-x]!medium100) name(frank) !strong'
           ]
 
-    
-    
+  # Strength and Weight
+  # --------------------------------------------------
 
+  describe '/* Strength and Weight */', ->
+
+    expectError '@vertical [#b1][b2] !mediun;', 'Invalid Strength or Weight'
+    expectError '@vertical [#b1][b2] !medium0.5;', 'Invalid Strength or Weight'
