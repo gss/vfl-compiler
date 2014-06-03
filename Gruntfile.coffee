@@ -23,7 +23,7 @@ module.exports = ->
     uglify:
       options:
         report: 'min'
-      noflo:
+      'vfl-compiler':
         files:
           './browser/vfl-compiler.min.js': ['./browser/vfl-compiler.js']
 
