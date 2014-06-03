@@ -4,25 +4,28 @@ else
   chai = require 'chai' unless chai
   parser = require '../lib/vfl-compiler'
 
-parse = (source, expect) ->
+{expect} = chai
+
+
+parse = (source, expectation) ->
   result = null  
   describe source, ->
     it 'should do something', ->
       result = parser.parse source
-      chai.expect(result).to.be.an 'array'
+      expect(result).to.be.an 'array'
     it 'should match expected', ->
-      chai.expect(result).to.eql expect
+      expect(result).to.eql expectation
 
 expectError = (source, message) ->
   describe source, ->
     it "should throw an error with message: #{message}", ->
       exercise = -> parser.parse source
-      chai.expect(exercise).to.throw Error, message
+      expect(exercise).to.throw Error, message
 
 describe 'VFL-to-CCSS Compiler', ->
   
   it 'should provide a parse method', ->
-    chai.expect(parser.parse).to.be.a 'function'
+    expect(parser.parse).to.be.a 'function'
 
   # Basics
   # --------------------------------------------------
