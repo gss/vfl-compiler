@@ -586,4 +586,4 @@ describe 'VFL-to-CCSS Compiler', ->
   describe '/* Strength and Weight */', ->
 
     expectError '@vertical [#b1][b2] !mediun;', 'Invalid Strength or Weight'
-    expectError '@vertical [#b1][b2] !medium0.5;', 'Invalid Strength or Weight'
+    expectError '@vertical [#b1][b2] !medium0.5;'
