@@ -16,11 +16,26 @@ parse = (source, expectation) ->
     it 'should match expected', ->
       expect(result).to.eql expectation
 
-expectError = (source, message) ->
+
+# Helper function for expecting errors to be thrown when parsing.
+#
+# @param source [String] A VFL expression.
+# @param message [String] This should be provided when a rule exists to catch
+# invalid syntax, and omitted when an error is expected to be thrown by the PEG
+# parser.
+# @param [Boolean] Whether the spec should be treated as pending.
+#
+expectError = (source, message, pending) ->
+  itFn = if pending then xit else it
+
   describe source, ->
-    it "should throw an error with message: #{message}", ->
+    predicate = 'should throw an error'
+    predicate = "#{predicate} with message: #{message}" if message?
+
+    itFn predicate, ->
       exercise = -> parser.parse source
       expect(exercise).to.throw Error, message
+
 
 describe 'VFL-to-CCSS Compiler', ->
   
