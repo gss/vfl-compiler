@@ -68,7 +68,6 @@ module.exports = ->
   @loadNpmTasks 'grunt-contrib-uglify'
 
   # Grunt plugins used for testing
-  @loadNpmTasks 'grunt-contrib-jshint'
   @loadNpmTasks 'grunt-cafe-mocha'
   @loadNpmTasks 'grunt-contrib-coffee'
   @loadNpmTasks 'grunt-mocha-phantomjs'
