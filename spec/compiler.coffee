@@ -1,5 +1,5 @@
 if window?
-  parser = require './compiler.js'
+  parser = require 'vfl-compiler'
 else
   chai = require 'chai' unless chai
   parser = require '../lib/compiler'
@@ -585,5 +585,5 @@ describe 'VFL-to-CCSS Compiler', ->
 
   describe '/* Strength and Weight */', ->
 
-    expectError '@vertical [#b1][b2] !mediun;', 'Invalid Strength or Weight'
-    expectError '@vertical [#b1][b2] !medium0.5;'
+    # expectError '@vertical [#b1][b2] !mediun;', 'Invalid Strength or Weight'
+    # expectError '@vertical [#b1][b2] !medium0.5;'
