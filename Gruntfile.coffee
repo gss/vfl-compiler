@@ -73,6 +73,6 @@ module.exports = ->
   @loadNpmTasks 'grunt-mocha-phantomjs'
   @loadNpmTasks 'grunt-contrib-watch'
 
-  @registerTask 'build', ['peg', 'componentbuild', 'uglify', 'coffee']
-  @registerTask 'test', ['build', 'cafemocha', 'mocha_phantomjs']
+  @registerTask 'build', ['coffee:src', 'peg', 'componentbuild', 'uglify']
+  @registerTask 'test', ['build', 'coffee:spec', 'cafemocha', 'mocha_phantomjs']
   @registerTask 'default', ['build']
