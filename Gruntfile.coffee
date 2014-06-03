@@ -6,7 +6,7 @@ module.exports = ->
     # Generate library from Peg grammar
     peg:
       parser:
-        src: 'grammar/parser.peg'
+        src: 'src/grammar.peg'
         dest: 'lib/parser.js'
 
     # Build the browser Component
@@ -31,10 +31,6 @@ module.exports = ->
     watch:
       files: ['spec/*.coffee', 'grammar/*.peg', 'lib/compiler.js']
       tasks: ['test']
-
-    # Code quality checks
-    jshint:
-      all: ['lib/compiler.js']
 
     # BDD tests on Node.js
     cafemocha:
@@ -79,5 +75,5 @@ module.exports = ->
   @loadNpmTasks 'grunt-contrib-watch'
 
   @registerTask 'build', ['peg', 'componentbuild', 'uglify', 'coffee']
-  @registerTask 'test', ['build', 'jshint', 'cafemocha', 'mocha_phantomjs']
+  @registerTask 'test', ['build', 'cafemocha', 'mocha_phantomjs']
   @registerTask 'default', ['build']

@@ -3,8 +3,8 @@
   "description": "Visual Format Language compiler",
   "version": "1.0.0beta",
   "scripts": [
-    "lib/vfl-compiler.js",
-    "lib/compiler.js"
+    "lib/compiler.js",
+    "lib/parser.js"
   ],
   "dependencies": {
     "the-gss/error-reporter": "*"

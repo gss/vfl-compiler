@@ -1,8 +1,8 @@
 if window?
-  parser = require 'vfl-compiler/lib/vfl-compiler.js'
+  parser = require './compiler.js'
 else
   chai = require 'chai' unless chai
-  parser = require '../lib/vfl-compiler'
+  parser = require '../lib/compiler'
 
 {expect} = chai
 
