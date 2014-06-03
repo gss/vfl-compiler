@@ -3,8 +3,6 @@
 
   p = parser = this;
   
-  var ErrorReporter = require('error-reporter');
-  p.errorReporter = new ErrorReporter(input);
   
   p.trickleDownOptions = ["name"];
   sizeVarNames = p.sizeVarNames = ["width", "height"];
@@ -428,7 +426,7 @@ StrengthAndWeight "Strength / Weight"
     return val.trim();
   }
   / "!" .? {
-    return p.errorReporter.reportError('Invalid Strength or Weight', line(), column());
+    throw new SyntaxError('Invalid Strength or Weight', null, null, null, line(), column());
   }
 
 Strength
