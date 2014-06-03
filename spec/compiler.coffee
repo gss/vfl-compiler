@@ -7,13 +7,16 @@ else
 {expect} = chai
 
 
-parse = (source, expectation) ->
-  result = null  
+parse = (source, expectation, pending) ->
+  itFn = if pending then xit else it
+
   describe source, ->
-    it 'should do something', ->
+    result = null
+
+    itFn 'should do something', ->
       result = parser.parse source
       expect(result).to.be.an 'array'
-    it 'should match expected', ->
+    itFn 'should match expected', ->
       expect(result).to.eql expectation
 
 
