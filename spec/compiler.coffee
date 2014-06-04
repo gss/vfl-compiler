@@ -22,7 +22,7 @@ parse = (source, expectation, pending) ->
 
 # Helper function for expecting errors to be thrown when parsing.
 #
-# @param source [String] A VFL expression.
+# @param source [String] VFL statements.
 # @param message [String] This should be provided when a rule exists to catch
 # invalid syntax, and omitted when an error is expected to be thrown by the PEG
 # parser.
