@@ -582,11 +582,3 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '@chain .super-box bottom(+[vgap])top center-x(::window[center-x]!medium100) name(frank) !strong'
           ]
-
-  # Strength and Weight
-  # --------------------------------------------------
-
-  describe '/* Strength and Weight */', ->
-
-    expectError '@vertical [#b1][b2] !mediun;', 'Invalid Strength or Weight'
-    expectError '@vertical [#b1][b2] !medium0.5;'
