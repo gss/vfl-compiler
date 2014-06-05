@@ -145,6 +145,8 @@ describe 'VFL-to-CCSS Compiler', ->
             '"a"[bottom] + [vgap] == "q-1"[top]'
             '"q-1"[bottom] + [vgap] == "_fallout"[top]'
           ]
+
+    expectError '@h [#b1[#b2];'
   
 
     
@@ -231,6 +233,8 @@ describe 'VFL-to-CCSS Compiler', ->
             '#sub1[right] + 8 == #sub2[left]'          
             '#sub2[right] + [baseline] == #parent[right]'
           ]
+
+    expectError '@h |-[#box]-;'
   
 
     
