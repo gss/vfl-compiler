@@ -186,15 +186,6 @@
   parser.getResults = function () {
     return this.cs;
   };
-
-  parser.error = function (m,l,c) {
-    if (!!l && !!c) {
-      m = m + " {line:" + l + ", col:" + c + "}";
-    }
-    console.error(m);
-    return m;
-  };
-  
   
   p.flatten = function (array, isShallow) {
     
@@ -434,15 +425,10 @@ StrengthAndWeight "Strength / Weight"
     val = "!" + p.join(s) + p.join(w);
     return val.trim();
   }
-  / "!" .? {return parser.error("Invalid Strength or Weight",line,column);}
+  / "!" .? {
+    throw new SyntaxError('Invalid Strength or Weight', null, null, null, line(), column());
+  }
 
-Strength
-  = ("require"  / "REQUIRE"  / "Require")  {return "require";}
-  / ("strong"   / "STRONG"   / "Strong")   {return "strong";}
-  / ("medium"   / "MEDIUM"   / "Medium")   {return "medium";}
-  / ("weak"     / "WEAK"     / "Weak")     {return "weak";}
-  / ("required" / "REQUIRED" / "Required") {return "require";}
-  
 NameChars
   = [a-zA-Z0-9#.\-_$:""]
 

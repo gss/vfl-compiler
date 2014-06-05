@@ -8,10 +8,10 @@
   <body>
     <div id="mocha"></div>
     <script src="../browser/vfl-compiler.js"></script>
-    <script src="http://chaijs.com/chai.js"></script>
+    <script src="../node_modules/chai/chai.js"></script>
     <script src="../node_modules/mocha/mocha.js"></script>
     <script>mocha.setup('bdd');</script>
-    <script src="./vfl.js"></script>
+    <script src="./compiler.js"></script>
     <script>
       if (window.mochaPhantomJS) {
         mochaPhantomJS.run();

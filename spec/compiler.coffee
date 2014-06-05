@@ -1,22 +1,49 @@
 if window?
-  parser = require 'vfl-compiler/lib/vfl-compiler.js'
+  parser = require 'vfl-compiler'
 else
   chai = require 'chai' unless chai
-  parser = require '../lib/vfl-compiler'
+  parser = require '../lib/compiler'
 
-parse = (source, expect) ->
-  result = null  
+{expect} = chai
+
+
+parse = (source, expectation, pending) ->
+  itFn = if pending then xit else it
+
   describe source, ->
-    it 'should do something', ->
+    result = null
+
+    itFn 'should do something', ->
       result = parser.parse source
-      chai.expect(result).to.be.an 'array'
-    it 'should match expected', ->
-      chai.expect(result).to.eql expect
+      expect(result).to.be.an 'array'
+    itFn 'should match expected', ->
+      expect(result).to.eql expectation
+
+
+# Helper function for expecting errors to be thrown when parsing.
+#
+# @param source [String] VFL statements.
+# @param message [String] This should be provided when a rule exists to catch
+# invalid syntax, and omitted when an error is expected to be thrown by the PEG
+# parser.
+# @param pending [Boolean] Whether the spec should be treated as pending.
+#
+expectError = (source, message, pending) ->
+  itFn = if pending then xit else it
+
+  describe source, ->
+    predicate = 'should throw an error'
+    predicate = "#{predicate} with message: #{message}" if message?
+
+    itFn predicate, ->
+      exercise = -> parser.parse source
+      expect(exercise).to.throw Error, message
+
 
 describe 'VFL-to-CCSS Compiler', ->
   
   it 'should provide a parse method', ->
-    chai.expect(parser.parse).to.be.a 'function'
+    expect(parser.parse).to.be.a 'function'
 
   # Basics
   # --------------------------------------------------
@@ -118,6 +145,8 @@ describe 'VFL-to-CCSS Compiler', ->
             '"a"[bottom] + [vgap] == "q-1"[top]'
             '"q-1"[bottom] + [vgap] == "_fallout"[top]'
           ]
+
+    expectError '@h [#b1[#b2];'
   
 
     
@@ -204,6 +233,8 @@ describe 'VFL-to-CCSS Compiler', ->
             '#sub1[right] + 8 == #sub2[left]'          
             '#sub2[right] + [baseline] == #parent[right]'
           ]
+
+    expectError '@h |-[#box]-;'
   
 
     
@@ -555,7 +586,3 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '@chain .super-box bottom(+[vgap])top center-x(::window[center-x]!medium100) name(frank) !strong'
           ]
-
-    
-    
-

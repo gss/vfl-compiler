@@ -6,8 +6,8 @@ module.exports = ->
     # Generate library from Peg grammar
     peg:
       parser:
-        src: 'grammar/vfl-compiler.peg'
-        dest: 'lib/vfl-compiler.js'
+        src: 'src/grammar.peg'
+        dest: 'lib/parser.js'
 
     # Build the browser Component
     componentbuild:
@@ -23,32 +23,38 @@ module.exports = ->
     uglify:
       options:
         report: 'min'
-      noflo:
+      'vfl-compiler':
         files:
           './browser/vfl-compiler.min.js': ['./browser/vfl-compiler.js']
 
     # Automated recompilation and testing when developing
     watch:
-      files: ['spec/*.coffee', 'grammar/*.peg', 'lib/compiler.js']
+      files: ['spec/**/*.coffee', 'src/**/*.{coffee,peg}']
       tasks: ['test']
-
-    # Code quality checks
-    jshint:
-      all: ['lib/compiler.js']
 
     # BDD tests on Node.js
     cafemocha:
       nodejs:
-        src: ['spec/*.coffee']
+        src: ['spec/**/*.coffee']
+      options:
+        reporter: 'spec'
 
     # CoffeeScript compilation
     coffee:
+      src:
+        options:
+          bare: true
+        expand: true
+        cwd: 'src'
+        src: ['**/*.coffee']
+        dest: 'lib'
+        ext: '.js'
       spec:
         options:
           bare: true
         expand: true
         cwd: 'spec'
-        src: ['**.coffee']
+        src: ['**/*.coffee']
         dest: 'spec'
         ext: '.js'
 
@@ -62,12 +68,11 @@ module.exports = ->
   @loadNpmTasks 'grunt-contrib-uglify'
 
   # Grunt plugins used for testing
-  @loadNpmTasks 'grunt-contrib-jshint'
   @loadNpmTasks 'grunt-cafe-mocha'
   @loadNpmTasks 'grunt-contrib-coffee'
   @loadNpmTasks 'grunt-mocha-phantomjs'
   @loadNpmTasks 'grunt-contrib-watch'
 
-  @registerTask 'build', ['peg', 'componentbuild', 'uglify', 'coffee']
-  @registerTask 'test', ['build', 'jshint', 'cafemocha', 'mocha_phantomjs']
+  @registerTask 'build', ['coffee:src', 'peg', 'componentbuild', 'uglify']
+  @registerTask 'test', ['build', 'coffee:spec', 'cafemocha', 'mocha_phantomjs']
   @registerTask 'default', ['build']
