@@ -367,7 +367,7 @@ ChainPredVal
   = [^>=<!) ]+
 
 View "VFL Element"
-  = "[" name:NameChars+ pred:Predicate? "]" 
+  = "(" name:NameChars+ pred:Predicate? ")" 
     {return {view:p.stringify(name),preds:pred};}   
   / "|" name:([^~\-] NameChars+) pred:Predicate? "|" 
     {return {view:p.stringify(name),preds:pred};}
