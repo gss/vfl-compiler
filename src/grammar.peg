@@ -2,8 +2,7 @@
   var p, parser, cs, leftVarNames, superLeftVarNames, rightVarNames, superRightVarNames, standardGapNames, getSuperViewName, getGapString, sizeVarNames; 
 
   p = parser = this;
-  
-  
+    
   p.trickleDownOptions = ["name"];
   sizeVarNames = p.sizeVarNames = ["width", "height"];
   leftVarNames = p.leftVarNames = ["right", "bottom"];
@@ -11,13 +10,21 @@
   rightVarNames = p.rightVarNames = ["left", "top"];
   superRightVarNames = p.superRightVarNames = ["right", "bottom"];
 
-  cs = parser.cs = [];
+  cs = p.cs = [];
 
-  parser.addC = function (c) {
+  p.addC = function (c) {
     cs.push(c);
   };
+  
+  
+  p.selectors = [];
+  p.addSelector = function (sel) {
+    if (p.selectors.indexOf(sel) === -1) {
+      p.selectors.push(sel);
+    }
+  }
 
-  parser.addPreds = function (view,preds,d) {
+  p.addPreds = function (view,preds,d) {
     var pred, ccss, eq, exps, exp;
     if (preds) {      
       for (var i = 0; i < preds.length; i++) {
@@ -40,14 +47,14 @@
     }
   };
 
-  parser.defaultChainObject = {
+  p.defaultChainObject = {
     headEq: "==",
     value: "",
     tailEq: "",
     s: ""
   };
 
-  parser.chainTailEqMap = {
+  p.chainTailEqMap = {
     "<=": ">=",
     ">=": "<=",
     "==": "==",
@@ -55,7 +62,7 @@
     ">" : "<" 
   };
 
-  parser.addChains = function (views,o) {
+  p.addChains = function (views,o) {
     var chains, chain, prop, preds, connector, ccss, view, pred;
     chains = o.chains;
     if (chains) {     
@@ -65,7 +72,7 @@
         preds = chain[1];
         if (preds === "" || !preds) {
           // load default chain predicate
-          preds = [parser.defaultChainObject];
+          preds = [p.defaultChainObject];
         } 
         for (var j = 0; j < preds.length; j++) {
           pred = preds[j];
@@ -73,14 +80,14 @@
           for (var k = 0; k < views.length - 1; k++) {
             view = views[k];  
             if (pred.headEq === "") {
-              pred.headEq = parser.defaultChainObject.headEq;
+              pred.headEq = p.defaultChainObject.headEq;
             }
             ccss += " " + view + "[" + prop + "] " + pred.headEq;
             if (pred.value !== "") {
               ccss += " " + pred.value;
               if (views.length > 1) {
                 if (pred.tailEq === "") {
-                  pred.tailEq = parser.chainTailEqMap[pred.headEq];
+                  pred.tailEq = p.chainTailEqMap[pred.headEq];
                 }
                 ccss += " " + pred.tailEq;
               }
@@ -108,7 +115,7 @@
     return o.in;
   };
 
-  parser.getLeftVar = function (view, dimension, o, viewObj) {
+  p.getLeftVar = function (view, dimension, o, viewObj) {
     var varName, viewName;
     if (viewObj.isPoint) {
       return viewObj.pos;
@@ -119,12 +126,13 @@
     }
     else {
       viewName = view;
+      p.addSelector(view);
       varName = leftVarNames[dimension];
     }
     return viewName + "[" + varName + "]";
   };
   
-  parser.getRightVar = function (view, dimension, o, viewObj) {
+  p.getRightVar = function (view, dimension, o, viewObj) {
     var varName;
     if (viewObj.isPoint) {
       return viewObj.pos;
@@ -134,6 +142,7 @@
       varName = superRightVarNames[dimension];
     }
     else {
+      p.addSelector(view);
       varName = rightVarNames[dimension];
       
     }
@@ -158,7 +167,7 @@
     return "+ " + g;
   };
 
-  parser.getConnectionString = function (c, d, o, withContainer) {
+  p.getConnectionString = function (c, d, o, withContainer) {
     
     return (getGapString(c.gap,d,o,withContainer) + " " + c.op).trim();
   };
@@ -183,8 +192,8 @@
   };
   
 
-  parser.getResults = function () {
-    return this.cs;
+  p.getResults = function () {
+    return { statements:this.cs, selectors:p.selectors};
   };
   
   p.flatten = function (array, isShallow) {
@@ -228,10 +237,10 @@
 }
 
 start
-  = __ Statement* __ { return parser.getResults(); }
+  = __ Statement* __ { return p.getResults(); }
 
 debug 
-  = __ vfl:Statement* __ { return parser.getResults().concat(vfl); }
+  = __ vfl:Statement* __ { return p.getResults().concat(vfl); }
 
 Statement
   = exp:VFLStatement EOS __ { return exp; }
@@ -246,13 +255,13 @@ VFLStatement
       headView = headViewObj.view;      
       chainedViews = [];      
       if (headView !== "|") {chainedViews.push(headView);}
-      parser.addPreds(headView,head.preds,d);      
+      p.addPreds(headView,head.preds,d);      
       for (var i = 0; i < tail.length; i++) {        
         connection = tail[i][1];
         tailViewObj = tail[i][3]
         tailView = tailViewObj.view;        
         if (tailView !== "|") {chainedViews.push(tailView);}
-        parser.addPreds(tailView,tail[i][3].preds,d);
+        p.addPreds(tailView,tail[i][3].preds,d);
         result = [
           //"c",
           connection,
@@ -266,13 +275,13 @@ VFLStatement
             + p.getRightVar(tailView, d, o, tailViewObj)   
             + p.getTrailingOptions(o)
             + p.getSW(o);
-          parser.addC(
+          p.addC(
             ccss.trim()
         );}
         headViewObj = tailViewObj;
         headView = tailView;
       }
-      parser.addChains(chainedViews,o);
+      p.addChains(chainedViews,o);
       return {'vfl':d, o:o};
     }
   / VFLPluralStatement
@@ -300,7 +309,7 @@ VFLPluralStatement
    }
    ccss += p.getTrailingOptions(o);
    ccss += p.getSW(o);
-   parser.addC(ccss.trim());
+   p.addC(ccss.trim());
    return {vfl:d,o:o}
  }
 
@@ -430,7 +439,7 @@ StrengthAndWeight "Strength / Weight"
   }
 
 NameChars
-  = [a-zA-Z0-9#.\-_$:""]
+  = [a-zA-Z0-9#.\-_$:""&]
 
 NameCharsWithSpace
   = NameChars / " "
