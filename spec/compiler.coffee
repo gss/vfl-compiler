@@ -741,7 +741,7 @@ describe 'VFL-to-CCSS Compiler', ->
   # -----------------------------
 
   parse """
-          @h (#nav) (.box)... (#aside);
+          @h (#nav) (.box)... (#aside)
         """
       ,
         {
@@ -754,7 +754,7 @@ describe 'VFL-to-CCSS Compiler', ->
         }
 
   parse """
-          @h | ~ (.box:even)... -16- (.box:odd)... ~ | in(&);
+          @h | ~ (.box:even)... -16- (.box:odd)... ~ | in(&)
         """
       ,
         {
@@ -772,7 +772,7 @@ describe 'VFL-to-CCSS Compiler', ->
           @v |
              (.box)...
              |
-               in(::window);
+               in(::window)
         """
       ,
         {
@@ -794,7 +794,7 @@ describe 'VFL-to-CCSS Compiler', ->
              ~20~
              (#footer)
              |
-               in(::window);
+               in(::window)
         """
       ,
         {
