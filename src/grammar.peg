@@ -305,34 +305,6 @@ VFLStatement
       p.addChains(chainedViews,o);
       return {'vfl':d, o:o};
     }
-  / VFLPluralStatement
-
-VFLPluralStatement
- = d:Dimension __ selector:NameChars+ __ o:Options __ s:StrengthAndWeight? {
-   var ccss = "@chain ";
-   selector = selector.join("").trim();
-   ccss += selector + " ";
-   ccss += p.leftVarNames[d] + "(";
-   if (o.gap) {
-     ccss += "+" + o.gap;
-   }
-   ccss += ")" + p.rightVarNames[d];
-   if (o.chains) {
-     o.chains.forEach( function (chain) {
-        ccss += " " + chain[0] + "(";
-        if (chain[1]) {
-          if (chain[1].raw) {
-            ccss += chain[1].raw;
-          }
-        }
-        ccss += ")";
-       });
-   }
-   ccss += p.getTrailingOptions(o);
-   ccss += p.getSW(o);
-   p.addC(ccss.trim());
-   return {vfl:d,o:o}
- }
 
 Dimension
   = ("@horizontal" / "@-gss-horizontal" / "@-gss-h" / "@h") {return 0;}

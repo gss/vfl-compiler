@@ -529,61 +529,6 @@ describe 'VFL-to-CCSS Compiler', ->
             '#b1[centerX] == "panel"[centerX] == #b2[centerX] !required'
           ]
 
-  # Plural selectors
-  # --------------------------------------------------
-
-  describe '/* Plural selectors */', ->
-
-    parse """
-            @v .box;
-          """
-        ,
-          [
-            '@chain .box bottom()top'
-          ]
-
-    parse """
-            @h .box chain-width chain-height();
-          """
-        ,
-          [
-            '@chain .box right()left width() height()'
-          ]
-
-    parse """
-            @h .box gap(20);
-          """
-        ,
-          [
-            '@chain .box right(+20)left'
-          ]
-
-    ### TODO
-    parse """
-            @h .box gap(20) in("area");
-          """
-        ,
-          [
-            '@chain .box ("area"[left])right(+20)left("area"[right])'
-          ]
-    ###
-
-    parse """
-            @v .super-box gap([vgap]);
-          """
-        ,
-          [
-            '@chain .super-box bottom(+[vgap])top'
-          ]
-
-    parse """
-            @v .super-box gap([vgap]) chain-center-x(::window[center-x] !medium100) !strong;
-          """
-        ,
-          [
-            '@chain .super-box bottom(+[vgap])top center-x(::window[center-x]!medium100) !strong'
-          ]
-
 
   # Names
   # --------------------------------------------------
@@ -620,14 +565,6 @@ describe 'VFL-to-CCSS Compiler', ->
             '#b3[bottom] == #b4[top] name(bob) !medium'
             '#b1[width] == #b2[width] == #b3[width] == #b4[width] name(bob)'
             '#b1[height] <= 150 >= #b2[height] <= 150 >= #b3[height] <= 150 >= #b4[height] name(bob) !required'
-          ]
-
-    parse """
-            @v .super-box gap([vgap]) chain-center-x(::window[center-x] !medium100) name(frank) !strong;
-          """
-        ,
-          [
-            '@chain .super-box bottom(+[vgap])top center-x(::window[center-x]!medium100) name(frank) !strong'
           ]
 
 
@@ -819,7 +756,7 @@ describe 'VFL-to-CCSS Compiler', ->
   describe '/* Selectors */', ->
 
     parse """
-            @h | (button.selected:first) (button.selected:last) | in(header.test:boob);
+            @h | (button.selected:first) (button.selected:last) | in(header.test:boob)
           """
         ,
           {
@@ -832,7 +769,7 @@ describe 'VFL-to-CCSS Compiler', ->
           }
 
     parse """
-            @v | (&) | in(::window);
+            @v | (&) | in(::window)
           """
         ,
           {
