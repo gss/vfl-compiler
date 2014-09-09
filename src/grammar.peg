@@ -1,8 +1,8 @@
 {
-  var p, parser, cs, leftVarNames, superLeftVarNames, rightVarNames, superRightVarNames, standardGapNames, getSuperViewName, getGapString, sizeVarNames; 
+  var p, parser, cs, leftVarNames, superLeftVarNames, rightVarNames, superRightVarNames, standardGapNames, getSuperViewName, getGapString, sizeVarNames;
 
   p = parser = this;
-    
+
   p.trickleDownOptions = ["name"];
   sizeVarNames = p.sizeVarNames = ["width", "height"];
   leftVarNames = p.leftVarNames = ["right", "bottom"];
@@ -15,8 +15,8 @@
   p.addC = function (c) {
     cs.push(c);
   };
-  
-  
+
+
   p.selectors = [];
   p.addSelector = function (sel) {
     if (p.selectors.indexOf(sel) === -1) {
@@ -26,13 +26,13 @@
 
   p.addPreds = function (view,preds,d) {
     var pred, ccss, eq, exps, exp;
-    if (preds) {      
+    if (preds) {
       for (var i = 0; i < preds.length; i++) {
         pred = preds[i];
         eq = pred[0];
         ccss = view + "[" + sizeVarNames[d] + "] " + eq + " ";
         exps = pred[1];
-        for (var j = 0; j < exps.length; j++) {       
+        for (var j = 0; j < exps.length; j++) {
           exp = exps[j];
           if (exp[0] === "view") {
             exp = exp[1] + "[" + sizeVarNames[d] + "]";
@@ -59,13 +59,13 @@
     ">=": "<=",
     "==": "==",
     "<" : ">",
-    ">" : "<" 
+    ">" : "<"
   };
 
   p.addChains = function (views,o) {
     var chains, chain, prop, preds, connector, ccss, view, pred;
     chains = o.chains;
-    if (chains) {     
+    if (chains) {
       for (var i = 0; i < chains.length; i++) {
         chain = chains[i];
         prop = chain[0];
@@ -73,12 +73,12 @@
         if (preds === "" || !preds) {
           // load default chain predicate
           preds = [p.defaultChainObject];
-        } 
+        }
         for (var j = 0; j < preds.length; j++) {
           pred = preds[j];
           ccss = "";
           for (var k = 0; k < views.length - 1; k++) {
-            view = views[k];  
+            view = views[k];
             if (pred.headEq === "") {
               pred.headEq = p.defaultChainObject.headEq;
             }
@@ -92,7 +92,7 @@
                 ccss += " " + pred.tailEq;
               }
               else {
-                ccss += " " + pred.s;                
+                ccss += " " + pred.s;
                 cs.push(ccss.trim());
               }
             }
@@ -105,7 +105,7 @@
           }
         }
       }
-    } 
+    }
   };
 
   getSuperViewName = function (o) {
@@ -131,7 +131,7 @@
     }
     return viewName + "[" + varName + "]";
   };
-  
+
   p.getRightVar = function (view, dimension, o, viewObj) {
     var varName;
     if (viewObj.isPoint) {
@@ -144,13 +144,13 @@
     else {
       p.addSelector(view);
       varName = rightVarNames[dimension];
-      
+
     }
     return view + "[" + varName + "]";
   };
-  
+
   standardGapNames = ["[hgap]", "[vgap]"];
-  
+
   getGapString = function (g,d,o,withContainer) {
     if (g === undefined) {return "";}
     if (g === "__STANDARD__") {
@@ -168,10 +168,10 @@
   };
 
   p.getConnectionString = function (c, d, o, withContainer) {
-    
+
     return (getGapString(c.gap,d,o,withContainer) + " " + c.op).trim();
   };
-      
+
   p.getTrailingOptions = function (o) {
     var string = "";
     if (o) {
@@ -183,23 +183,23 @@
     }
     return string;
   };
-  
+
   p.getSW = function (o) {
     if (o.sw) {
       return " " + o.sw.trim();
     }
     return "";
   };
-  
+
 
   p.getResults = function () {
     return { statements:this.cs, selectors:p.selectors};
   };
-  
+
   p.flatten = function (array, isShallow) {
-    
+
     if (typeof array === "string") {return array;}
-    
+
     var index = -1,
       length = array ? array.length : 0,
       result = [];
@@ -228,18 +228,18 @@
     if (a.join){return a.join("");}
     return a;
   };
-  
+
   p.stringify = function (array) {
     if (!array) {return "";}
     return p.trim(p.join(p.flatten(array)));
   };
-  
+
 }
 
 start
   = __ Statement* __ { return p.getResults(); }
 
-debug 
+debug
   = __ vfl:Statement* __ { return p.getResults().concat(vfl); }
 
 Statement
@@ -249,17 +249,17 @@ VFLStatement
   = d:Dimension __ head:View
     tail:(__ Connection? __ View)* __ o:Options {
       var connection, result, ccss, chainedViews, withContainer,
-        tailView, tailViewObj, headView, headViewObj;      
-      result = head;      
+        tailView, tailViewObj, headView, headViewObj;
+      result = head;
       headViewObj = head;
-      headView = headViewObj.view;      
-      chainedViews = [];      
+      headView = headViewObj.view;
+      chainedViews = [];
       if (headView !== "|") {chainedViews.push(headView);}
-      p.addPreds(headView,head.preds,d);      
-      for (var i = 0; i < tail.length; i++) {        
+      p.addPreds(headView,head.preds,d);
+      for (var i = 0; i < tail.length; i++) {
         connection = tail[i][1];
         tailViewObj = tail[i][3]
-        tailView = tailViewObj.view;        
+        tailView = tailViewObj.view;
         if (tailView !== "|") {chainedViews.push(tailView);}
         p.addPreds(tailView,tail[i][3].preds,d);
         result = [
@@ -270,9 +270,9 @@ VFLStatement
         ];
         if (!(headViewObj.isPoint && tailViewObj.isPoint)) {
           withContainer = ( headView =="|" || tailView === "|");
-          ccss = p.getLeftVar(headView, d, o, headViewObj) + " " 
-            + p.getConnectionString(connection, d, o, withContainer) + " " 
-            + p.getRightVar(tailView, d, o, tailViewObj)   
+          ccss = p.getLeftVar(headView, d, o, headViewObj) + " "
+            + p.getConnectionString(connection, d, o, withContainer) + " "
+            + p.getRightVar(tailView, d, o, tailViewObj)
             + p.getTrailingOptions(o)
             + p.getSW(o);
           p.addC(
@@ -289,7 +289,7 @@ VFLStatement
 VFLPluralStatement
  = d:Dimension __ selector:NameChars+ __ o:Options __ s:StrengthAndWeight? {
    var ccss = "@chain ";
-   selector = selector.join("").trim();   
+   selector = selector.join("").trim();
    ccss += selector + " ";
    ccss += p.leftVarNames[d] + "(";
    if (o.gap) {
@@ -298,7 +298,7 @@ VFLPluralStatement
    ccss += ")" + p.rightVarNames[d];
    if (o.chains) {
      o.chains.forEach( function (chain) {
-        ccss += " " + chain[0] + "("; 
+        ccss += " " + chain[0] + "(";
         if (chain[1]) {
           if (chain[1].raw) {
             ccss += chain[1].raw;
@@ -322,7 +322,7 @@ Options
   = os:Option*  {
     var obj = {};
     obj.chains = [];
-    for (var i = 0; i < os.length; i++) {          
+    for (var i = 0; i < os.length; i++) {
       // proccess chains
       if (!!os[i].chain) {
         obj.chains.push(os[i].chain);
@@ -330,7 +330,7 @@ Options
       // or just add option
       else {
         obj[os[i].key] = os[i].value;
-      }            
+      }
     }
     return obj;
   }
@@ -376,15 +376,15 @@ ChainPredVal
   = [^>=<!) ]+
 
 View "VFL Element"
-  = "(" name:NameChars+ pred:Predicate? ")" 
-    {return {view:p.stringify(name),preds:pred};}   
-  / "|" name:([^~\-] NameChars+) pred:Predicate? "|" 
+  = "(" name:NameChars+ pred:Predicate? ")"
+    {return {view:p.stringify(name),preds:pred};}
+  / "|" name:([^~\-] NameChars+) pred:Predicate? "|"
     {return {view:p.stringify(name),preds:pred};}
   /  point:Point       {return {view:"|", isPoint:true, pos:point};}
   / "|"                                   {return {view:"|"};}
-  // errorr 
+  // errorr
 
-Point "Point" 
+Point "Point"
   = "<" _? position:[^>]+ _? ">" {
     return p.stringify(position);
   }
@@ -398,7 +398,7 @@ PredExpression "Predicate Expression"
 PredEq
   = _? eq:("==" / "<=" / "<" / ">=" / ">" / "=<"{return "<=";} / "=>"{return ">=";}) _?  {return eq;}
 
-PredOp 
+PredOp
   = op:[+\-/*] _? {return op;}
 
 PredView
@@ -417,19 +417,20 @@ PredSeperator
   = ","? {return "";}
 
 Connection "VFL Connection"
-  = "-" gap:GapChars+ "-"  {return {op:"==",gap:gap.join("")};}
+  = "-" _ gap:ExplicitGap _ "-"  {return {op:"==",gap:gap};}
   / "-"                    {return {op:"==",gap:"__STANDARD__"};}
-  / "~" gap:GapChars+ "~"  {return {op:"<=",gap:gap.join("")};}
+  / "~" _ gap:ExplicitGap _ "~"  {return {op:"<=",gap:gap};}
   / "~" "-" "~"            {return {op:"<=",gap:"__STANDARD__"};}
   / "~"                    {return {op:"<="};}
   / ""                     {return {op:"=="};}
 
-GapChars "VFL Connection Gap"
-  = [a-zA-Z0-9#._$]
+ExplicitGap "VFL Connection Gap"
+  = gap:[a-zA-Z0-9_$]+ {return gap.join("");}
+  / gap:[^\[]* "[" varr:[^\]]+ "]" {return gap.join("") + "[" + varr.join("") + "]";}
 
-  
+
 StrengthAndWeight "Strength / Weight"
-  = "!" s:([a-zA-Z]+)? w:([0-9]+)? { 
+  = "!" s:([a-zA-Z]+)? w:([0-9]+)? {
     var val;
     val = "!" + p.join(s) + p.join(w);
     return val.trim();

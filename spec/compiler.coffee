@@ -9,12 +9,12 @@ else
 
 parse = (sources, expectation, pending) ->
   itFn = if pending then xit else it
-  
-  
+
+
   if !(sources instanceof Array)
     sources = [sources]
   for source in sources
-  
+
     describe source, ->
       result = null
 
@@ -50,13 +50,13 @@ expectError = (source, message, pending) ->
 
 
 describe 'VFL-to-CCSS Compiler', ->
-  
+
   it 'should provide a parse method', ->
     expect(parser.parse).to.be.a 'function'
 
   # Basics
   # --------------------------------------------------
-  
+
   describe '/* Basics */', ->
 
     parse """
@@ -66,7 +66,7 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             "#b1[right] == #b2[left]"
           ]
-    
+
     parse """
             @h (#b1)(#b2); // shorthand
           """
@@ -74,7 +74,7 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             "#b1[right] == #b2[left]"
           ]
-    
+
     parse """
             @vertical (#b1)(#b2); // shorthand
           """
@@ -82,9 +82,9 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             "#b1[bottom] == #b2[top]"
           ]
-    
+
     parse """
-            @v (#b1)-(#b2)-(#b3)-(#b4)-(#b5); // implicit standard gaps
+            @v (#b1)-(#b2)  -  (#b3)- (#b4) -(#b5); // implicit standard gaps
           """
         ,
           [
@@ -93,7 +93,7 @@ describe 'VFL-to-CCSS Compiler', ->
             "#b3[bottom] + [vgap] == #b4[top]"
             "#b4[bottom] + [vgap] == #b5[top]"
           ]
-    
+
     parse [
             """
               @v (#b1)-(#b2)-(#b3)-(#b4)-(#b5) gap(20); // explicit standard gaps
@@ -107,9 +107,9 @@ describe 'VFL-to-CCSS Compiler', ->
                   -20-
                  (#b4)
                   -
-                 (#b5) 
-                 
-                 gap(20); 
+                 (#b5)
+
+                 gap(20);
             """
           ]
         ,
@@ -119,16 +119,35 @@ describe 'VFL-to-CCSS Compiler', ->
             "#b3[bottom] + 20 == #b4[top]"
             "#b4[bottom] + 20 == #b5[top]"
           ]
-    
+
+    parse [
+            "@h (#b1)-100-(#b2)-8-(#b3); // explicit gaps",
+            "@h (#b1) - 100 - (#b2) - 8 - (#b3); // explicit gaps"
+          ],
+
+          [
+            "#b1[right] + 100 == #b2[left]"
+            "#b2[right] + 8 == #b3[left]"
+          ]
+
     parse """
-            @h (#b1)-100-(#b2)-8-(#b3); // explicit gaps
+            @h (#b1)-[my-gap]-(#b2)-[my-other-gap]-(#b3); // explicit var gaps
           """
         ,
           [
-            "#b1[right] + 100 == #b2[left]"
-            "#b2[right] + 8 == #b3[left]"              
+            "#b1[right] + [my-gap] == #b2[left]"
+            "#b2[right] + [my-other-gap] == #b3[left]"
           ]
-    
+
+    parse """
+            @h (#b1)-#box1.class1[width]-(#b2)-"virtual"[-my-custom-prop]-(#b3); // explicit view var gaps
+          """
+        ,
+          [
+            "#b1[right] + #box1.class1[width] == #b2[left]"
+            """#b2[right] + "virtual"[-my-custom-prop] == #b3[left]"""
+          ]
+
     parse """
             @h (#b1)(#b2)-(#b3)-100-(#b4) gap(20); // mix gaps
           """
@@ -138,7 +157,7 @@ describe 'VFL-to-CCSS Compiler', ->
             "#b2[right] + 20 == #b3[left]"
             "#b3[right] + 100 == #b4[left]"
           ]
-    
+
     parse """
             @h (#b1)-100-(#b2)-(#b3)-(#b4) gap([col-width]); // variable standard gap
           """
@@ -148,7 +167,7 @@ describe 'VFL-to-CCSS Compiler', ->
             "#b2[right] + [col-width] == #b3[left]"
             "#b3[right] + [col-width] == #b4[left]"
           ]
-    
+
     parse """
             @h (#b1)-100-(#b2)-(#b3)-(#b4) gap(#box1[width]); // view variable standard gap
           """
@@ -158,7 +177,7 @@ describe 'VFL-to-CCSS Compiler', ->
             "#b2[right] + #box1[width] == #b3[left]"
             "#b3[right] + #box1[width] == #b4[left]"
           ]
-    
+
     parse """
             @v ("Zone")-("1")-("a")-("q-1")-("_fallout"); // virtuals
           """
@@ -171,55 +190,55 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
 
     expectError '@h (#b1(#b2);'
-  
 
-    
-    
-  
-     
+
+
+
+
+
   # Element Containment
   # --------------------------------------------------
-  
+
   describe '/* Element Containment */', ->
-    
+
     parse """
             @v |(#sub)| in(#parent); // flush with super view
           """
         ,
           [
             '#parent[top] == #sub[top]'
-            '#sub[bottom] == #parent[bottom]'          
+            '#sub[bottom] == #parent[bottom]'
           ]
-    
+
     parse """
             @v |("sub")| in("parent"); // virtuals
           """
         ,
           [
             '"parent"[top] == "sub"[top]'
-            '"sub"[bottom] == "parent"[bottom]'          
+            '"sub"[bottom] == "parent"[bottom]'
           ]
-          
-    
+
+
     parse """
             @v |(#sub)|; // super view defaults to ::this
           """
         ,
           [
             '::this[top] == #sub[top]'
-            '#sub[bottom] == ::this[bottom]'          
+            '#sub[bottom] == ::this[bottom]'
           ]
-    
+
     parse """
             @h |-(#sub1)-(#sub2)-| in(#parent); // super view with standard gaps
           """
         ,
           [
             '#parent[left] + [hgap] == #sub1[left]'
-            '#sub1[right] + [hgap] == #sub2[left]'          
+            '#sub1[right] + [hgap] == #sub2[left]'
             '#sub2[right] + [hgap] == #parent[right]'
           ]
-    
+
     parse """
             @h |-1-(#sub)-2-| in(#parent); // super view with explicit gaps
           """
@@ -228,7 +247,7 @@ describe 'VFL-to-CCSS Compiler', ->
             '#parent[left] + 1 == #sub[left]'
             '#sub[right] + 2 == #parent[right]'
           ]
-    
+
     parse """
             @h |-|#sub|-| in(#parent) gap(100); // super view with explicit standard gaps
           """
@@ -237,57 +256,57 @@ describe 'VFL-to-CCSS Compiler', ->
             '#parent[left] + 100 == #sub[left]'
             '#sub[right] + 100 == #parent[right]'
           ]
-    
+
     parse """
             @h |-(#sub1)-(#sub2)-| in(#parent) outer-gap(10); // outer-gap
           """
         ,
           [
             '#parent[left] + 10 == #sub1[left]'
-            '#sub1[right] + [hgap] == #sub2[left]'          
+            '#sub1[right] + [hgap] == #sub2[left]'
             '#sub2[right] + 10 == #parent[right]'
           ]
-    
+
     parse """
             @h |-(#sub1)-(#sub2)-| in(#parent) gap(8) outer-gap([baseline]); // outer-gap
           """
         ,
           [
             '#parent[left] + [baseline] == #sub1[left]'
-            '#sub1[right] + 8 == #sub2[left]'          
+            '#sub1[right] + 8 == #sub2[left]'
             '#sub2[right] + [baseline] == #parent[right]'
           ]
 
     expectError '@h |-(#box]-;'
-  
 
-    
-    
-  
-     
+
+
+
+
+
   # Points
   # --------------------------------------------------
-  
+
   describe '/* Points */', ->
-    
+
     parse """
             @v <100>(#sub)<300>; // point containment
           """
         ,
           [
             '100 == #sub[top]'
-            '#sub[bottom] == 300'          
+            '#sub[bottom] == 300'
           ]
-    
+
     parse """
             @h < "col1"[center-x] + 20 >-(#box1)-< ::window[center-x] >; // point containment
           """
         ,
           [
             '"col1"[center-x] + 20 + [hgap] == #box1[left]'
-            '#box1[right] + [hgap] == ::window[center-x]'          
+            '#box1[right] + [hgap] == ::window[center-x]'
           ]
-          
+
     parse """
             @h < [line] >-(#box1)-(#box2); // point containment
           """
@@ -296,16 +315,16 @@ describe 'VFL-to-CCSS Compiler', ->
             '[line] + [hgap] == #box1[left]'
             '#box1[right] + [hgap] == #box2[left]'
           ]
-    
+
     parse """
             @h (#btn1)-<::window[center-x]>-(#btn2) gap(8); // point in alignment
           """
         ,
           [
             '#btn1[right] + 8 == ::window[center-x]'
-            '::window[center-x] + 8 == #btn2[left]'          
+            '::window[center-x] + 8 == #btn2[left]'
           ]
-    
+
     parse """
             @h (#btn1)-<::window[center-x]>-(#btn2) gap(8) chain-top chain-width(==); // chains ignore points
           """
@@ -316,30 +335,30 @@ describe 'VFL-to-CCSS Compiler', ->
             '#btn1[top] == #btn2[top]'
             '#btn1[width] == #btn2[width]'
           ]
-          
+
     parse """
-            @h (#btn1)-<"col3"[left]> 
-                       <"col4"[right]>-(#btn2) 
-              gap(8); 
+            @h (#btn1)-<"col3"[left]>
+                       <"col4"[right]>-(#btn2)
+              gap(8);
               // consecutive points are not equalized
           """
         ,
           [
             '#btn1[right] + 8 == "col3"[left]'
-            '"col4"[right] + 8 == #btn2[left]'          
+            '"col4"[right] + 8 == #btn2[left]'
           ]
-    
-      
-    
 
-          
-            
-  
+
+
+
+
+
+
   # Cushions
   # --------------------------------------------------
-  
+
   describe '/* Cushions */', ->
-    
+
     parse """
             @h (#b1)~(#b2); // simple cushion
           """
@@ -347,31 +366,31 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             "#b1[right] <= #b2[left]"
           ]
-    
+
     parse """
             @h (#b1)~-~(#b2)~100~(#b3); // cushions w/ gaps
           """
         ,
           [
             "#b1[right] + [hgap] <= #b2[left]"
-            "#b2[right] + 100 <= #b3[left]"              
+            "#b2[right] + 100 <= #b3[left]"
           ]
-    
+
     parse """
             @h |~(#sub)~2~| in(#parent); // super view with cushions
           """
         ,
           [
             '#parent[left] <= #sub[left]'
-            '#sub[right] + 2 <= #parent[right]'     
+            '#sub[right] + 2 <= #parent[right]'
           ]
-  
-  
+
+
   # Predicates
   # --------------------------------------------------
-  
+
   describe '/* Predicates */', ->
-    
+
     parse """
             @v (#sub(==100)); // single predicate
           """
@@ -379,7 +398,7 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '#sub[height] == 100'
           ]
-    
+
     parse """
             @v (#box(<=100!required,>=30!strong100)); // multiple predicates w/ strength & weight
           """
@@ -388,7 +407,7 @@ describe 'VFL-to-CCSS Compiler', ->
             '#box[height] <= 100 !required'
             '#box[height] >= 30 !strong100'
           ]
-    
+
     parse """
             @h (#b1(<=100))(#b2(==#b1)); // connected predicates
           """
@@ -398,7 +417,7 @@ describe 'VFL-to-CCSS Compiler', ->
             '#b2[width] == #b1[width]'
             '#b1[right] == #b2[left]'
           ]
-    
+
     parse """
             @h ("b1"(<=100)) ("b2"(=="b1")); // virtuals
           """
@@ -408,7 +427,7 @@ describe 'VFL-to-CCSS Compiler', ->
             '"b2"[width] == "b1"[width]'
             '"b1"[right] == "b2"[left]'
           ]
-          
+
     parse """
             @h (#b1( <=100 , ==#b99 !99 ))(#b2(>= #b1 *2  !weak10, <=3!required))-100-(.b3(==200)) !medium200; // multiple, connected predicates w/ strength & weight
           """
@@ -422,7 +441,7 @@ describe 'VFL-to-CCSS Compiler', ->
             '.b3[width] == 200'
             '#b2[right] + 100 == .b3[left] !medium200'
           ]
-    
+
     parse """
             @h (#b1(==[colwidth])); // predicate with constraint variable
           """
@@ -430,7 +449,7 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '#b1[width] == [colwidth]'
           ]
-    
+
     parse """
             @h (#b1(==#b2[height])); // predicate with explicit view variable
           """
@@ -439,12 +458,12 @@ describe 'VFL-to-CCSS Compiler', ->
             '#b1[width] == #b2[height]'
           ]
 
-  
+
   # Chains
   # --------------------------------------------------
-  
+
   describe '/* Chains */', ->
-    
+
     parse """
             @h (#b1)(#b2) chain-height chain-width(250); // basic equality chains
           """
@@ -452,9 +471,9 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '#b1[right] == #b2[left]'
             '#b1[height] == #b2[height]'
-            '#b1[width] == 250 == #b2[width]'          
+            '#b1[width] == 250 == #b2[width]'
           ]
-    
+
     parse """
             @h (#b1)(#b2)(#b3) chain-width(==[colwidth]!strong,<=500!required); // mutliple chain predicates
           """
@@ -465,7 +484,7 @@ describe 'VFL-to-CCSS Compiler', ->
             '#b1[width] == [colwidth] == #b2[width] == [colwidth] == #b3[width] !strong'
             '#b1[width] <= 500 >= #b2[width] <= 500 >= #b3[width] !required'
           ]
-          
+
     parse """
             @v (#b1)(#b2)(#b3)(#b4) chain-width(==!weak10) chain-height(<=150>=!required) !medium; // explicit equality & inequality chains
           """
@@ -477,7 +496,7 @@ describe 'VFL-to-CCSS Compiler', ->
             '#b1[width] == #b2[width] == #b3[width] == #b4[width] !weak10'
             '#b1[height] <= 150 >= #b2[height] <= 150 >= #b3[height] <= 150 >= #b4[height] !required'
           ]
-    
+
     parse """
             @v (#b1(==100!strong)) chain-centerX chain-width( 50 !weak10); // single view w/ equality chains
           """
@@ -485,7 +504,7 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '#b1[height] == 100 !strong'
           ]
-    
+
     parse """
             @v |-8-(#b1(==100!strong))(#b2)-8-| in(#panel) chain-centerX( #panel[centerX] !required) chain-width(>=50=<!weak10); // adv w/ super views & chains
           """
@@ -494,11 +513,11 @@ describe 'VFL-to-CCSS Compiler', ->
             '#b1[height] == 100 !strong'
             '#panel[top] + 8 == #b1[top]'
             '#b1[bottom] == #b2[top]'
-            '#b2[bottom] + 8 == #panel[bottom]'              
+            '#b2[bottom] + 8 == #panel[bottom]'
             '#b1[centerX] == #panel[centerX] == #b2[centerX] !required'
             '#b1[width] >= 50 <= #b2[width] !weak10'
           ]
-    
+
     parse """
             @v |-(#b1)-(#b2)-| in("panel") gap("zone"[col-size]) outer-gap("outer-zone"[row-size]) chain-centerX( "panel"[centerX] !required); // adv w/ virtuals
           """
@@ -506,15 +525,15 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '"panel"[top] + "outer-zone"[row-size] == #b1[top]'
             '#b1[bottom] + "zone"[col-size] == #b2[top]'
-            '#b2[bottom] + "outer-zone"[row-size] == "panel"[bottom]'              
+            '#b2[bottom] + "outer-zone"[row-size] == "panel"[bottom]'
             '#b1[centerX] == "panel"[centerX] == #b2[centerX] !required'
           ]
-  
+
   # Plural selectors
   # --------------------------------------------------
-  
+
   describe '/* Plural selectors */', ->
-    
+
     parse """
             @v .box;
           """
@@ -522,7 +541,7 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '@chain .box bottom()top'
           ]
-    
+
     parse """
             @h .box chain-width chain-height();
           """
@@ -530,7 +549,7 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '@chain .box right()left width() height()'
           ]
-    
+
     parse """
             @h .box gap(20);
           """
@@ -538,7 +557,7 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '@chain .box right(+20)left'
           ]
-    
+
     ### TODO
     parse """
             @h .box gap(20) in("area");
@@ -548,7 +567,7 @@ describe 'VFL-to-CCSS Compiler', ->
             '@chain .box ("area"[left])right(+20)left("area"[right])'
           ]
     ###
-    
+
     parse """
             @v .super-box gap([vgap]);
           """
@@ -556,7 +575,7 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '@chain .super-box bottom(+[vgap])top'
           ]
-    
+
     parse """
             @v .super-box gap([vgap]) chain-center-x(::window[center-x] !medium100) !strong;
           """
@@ -564,13 +583,13 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             '@chain .super-box bottom(+[vgap])top center-x(::window[center-x]!medium100) !strong'
           ]
-      
-  
+
+
   # Names
   # --------------------------------------------------
-  
+
   describe '/* Names */', ->
-    
+
     parse """
             @h (#b1)-100-(#b2)-(#b3)-(#b4) gap(#box1[width]) name(button-layout) !strong; // view variable standard gap
           """
@@ -580,7 +599,7 @@ describe 'VFL-to-CCSS Compiler', ->
             "#b2[right] + #box1[width] == #b3[left] name(button-layout) !strong"
             "#b3[right] + #box1[width] == #b4[left] name(button-layout) !strong"
           ]
-    
+
     parse """
             @h (#b1)-100-(#b2)-(#b3)-(#b4) gap(#box1[width]) !strong name(button-layout); // view variable standard gap
           """
@@ -590,7 +609,7 @@ describe 'VFL-to-CCSS Compiler', ->
             "#b2[right] + #box1[width] == #b3[left] name(button-layout) !strong"
             "#b3[right] + #box1[width] == #b4[left] name(button-layout) !strong"
           ]
-    
+
     parse """
             @v (#b1)(#b2)(#b3)(#b4) chain-width(==) chain-height(<=150>=!required) name(bob) !medium; // explicit equality & inequality chains
           """
@@ -602,7 +621,7 @@ describe 'VFL-to-CCSS Compiler', ->
             '#b1[width] == #b2[width] == #b3[width] == #b4[width] name(bob)'
             '#b1[height] <= 150 >= #b2[height] <= 150 >= #b3[height] <= 150 >= #b4[height] name(bob) !required'
           ]
-    
+
     parse """
             @v .super-box gap([vgap]) chain-center-x(::window[center-x] !medium100) name(frank) !strong;
           """
@@ -613,11 +632,14 @@ describe 'VFL-to-CCSS Compiler', ->
 
 
 
+
+
+
   # Selectors
   # --------------------------------------------------
-  
+
   describe '/* Selectors */', ->
-    
+
     parse """
             @h | (button.selected:first) (button.selected:last) | in(header.test:boob);
           """
@@ -630,7 +652,7 @@ describe 'VFL-to-CCSS Compiler', ->
               ]
             selectors: ['button.selected:first', 'button.selected:last']
           }
-    
+
     parse """
             @v | (&) | in(::window);
           """
