@@ -24,6 +24,26 @@
     }
   }
 
+  p.addSplatIfNeeded = function (v, d, o) { // viewObj, dimension, options
+    var statement, op, gap;
+    if (v.connection) {
+      op = v.connection.op;
+      gap = v.connection.gap;
+    }
+    else {
+      op = "==";
+      gap = 0;
+    }
+    if (v.isSplat) {
+      statement = v.view + " { " +
+        "&[" + leftVarNames[d] + "] ";
+      statement += p.getConnectionString(v.connection, d, o, false) + " ";
+      statement += "&:next[" + rightVarNames[d] + "];" +
+        " }";
+
+      p.addC(statement);
+    }
+  }
   p.addPreds = function (view,preds,d) {
     var pred, ccss, eq, exps, exp;
     if (preds) {
@@ -126,7 +146,7 @@
     }
     else {
       viewName = view;
-      p.addSelector(view);
+      if (viewObj.isSplat) {viewName += ":last"}
       varName = leftVarNames[dimension];
     }
     return viewName + "[" + varName + "]";
@@ -142,9 +162,8 @@
       varName = superRightVarNames[dimension];
     }
     else {
-      p.addSelector(view);
+      if (viewObj.isSplat) {view += ":first"}
       varName = rightVarNames[dimension];
-
     }
     return view + "[" + varName + "]";
   };
@@ -250,6 +269,7 @@ VFLStatement
     tail:(__ Connection? __ View)* __ o:Options {
       var connection, result, ccss, chainedViews, withContainer,
         tailView, tailViewObj, headView, headViewObj;
+      p.addSplatIfNeeded(head, d, o);
       result = head;
       headViewObj = head;
       headView = headViewObj.view;
@@ -258,7 +278,8 @@ VFLStatement
       p.addPreds(headView,head.preds,d);
       for (var i = 0; i < tail.length; i++) {
         connection = tail[i][1];
-        tailViewObj = tail[i][3]
+        tailViewObj = tail[i][3];
+        p.addSplatIfNeeded(tailViewObj, d, o);
         tailView = tailViewObj.view;
         if (tailView !== "|") {chainedViews.push(tailView);}
         p.addPreds(tailView,tail[i][3].preds,d);
@@ -376,13 +397,23 @@ ChainPredVal
   = [^>=<!) ]+
 
 View "VFL Element"
-  = "(" name:NameChars+ pred:Predicate? ")"
-    {return {view:p.stringify(name),preds:pred};}
+  = Splat
+  / ViewSelector
   / "|" name:([^~\-] NameChars+) pred:Predicate? "|"
     {return {view:p.stringify(name),preds:pred};}
   /  point:Point       {return {view:"|", isPoint:true, pos:point};}
   / "|"                                   {return {view:"|"};}
   // errorr
+
+ViewSelector
+  = "(" _ view:NameChars+ _ pred:Predicate? _ ")"
+    {view = p.stringify(view); p.addSelector(view); return {view:view,preds:pred};}
+
+Splat
+  = o:ViewSelector __ connection:Connection? __ "..."
+    {o.isSplat = true; o.connection = connection; return o;}
+
+
 
 Point "Point"
   = "<" _? position:[^>]+ _? ">" {

@@ -631,6 +631,184 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
 
 
+  # Splat
+  # --------------------------------------------------
+
+  describe '/* Splats */', ->
+
+    # @h Just splats + gaps
+    # -----------------------------
+
+    parse """
+            @h (.box)...;
+          """
+        ,
+          {
+            statements: [
+                ".box { &[right] == &:next[left]; }"
+              ]
+            selectors: ['.box']
+          }
+
+    parse [
+            """
+              @h (.box)-10-...;
+            """,
+            """
+              @h (.box)-... gap(10);
+            """
+          ]
+        ,
+          {
+            statements: [
+                ".box { &[right] + 10 == &:next[left]; }"
+              ]
+            selectors: ['.box']
+          }
+
+    parse [
+            """
+              @h (.box)-... gap("col-1"[width]);
+            """,
+            """
+              @h (.box)-"col-1"[width]-...;
+            """
+          ]
+        ,
+          {
+            statements: [
+                """.box { &[right] + "col-1"[width] == &:next[left]; }"""
+              ]
+            selectors: ['.box']
+          }
+
+    # @v Just splats + cushions
+    # -----------------------------
+
+    parse """
+            @v (.box)~...;
+          """
+        ,
+          {
+            statements: [
+                ".box { &[bottom] <= &:next[top]; }"
+              ]
+            selectors: ['.box']
+          }
+
+    parse [
+            """
+              @v (.box)
+                ~10~...;
+            """,
+            """
+              @v (.box) ~-~ ... gap(10);
+            """
+          ]
+        ,
+          {
+            statements: [
+                ".box { &[bottom] + 10 <= &:next[top]; }"
+              ]
+            selectors: ['.box']
+          }
+
+    parse [
+            """
+              @v
+                ( .box )
+                ~-~
+                ...
+
+                gap("col-1"[width]);
+            """,
+            """
+              @v
+                ( .box )
+                  ~ "col-1"[width] ~
+                  ...;
+            """
+          ]
+        ,
+          {
+            statements: [
+                """.box { &[bottom] + "col-1"[width] <= &:next[top]; }"""
+              ]
+            selectors: ['.box']
+          }
+
+  # Splats + other layout items
+  # -----------------------------
+
+  parse """
+          @h (#nav) (.box)... (#aside);
+        """
+      ,
+        {
+          statements: [
+              ".box { &[right] == &:next[left]; }"
+              "#nav[right] == .box:first[left]"
+              ".box:last[right] == #aside[left]"
+            ]
+          selectors: ['#nav','.box','#aside']
+        }
+
+  parse """
+          @h | ~ (.box:even)... -16- (.box:odd)... ~ | in(&);
+        """
+      ,
+        {
+          statements: [
+              ".box:even { &[right] == &:next[left]; }"
+              "&[left] <= .box:even:first[left]"
+              ".box:odd { &[right] == &:next[left]; }"
+              ".box:even:last[right] + 16 == .box:odd:first[left]"
+              ".box:odd:last[right] <= &[right]"
+            ]
+          selectors: ['.box:even','.box:odd']
+        }
+
+  parse """
+          @v |
+             (.box)...
+             |
+               in(::window);
+        """
+      ,
+        {
+          statements: [
+              ".box { &[bottom] == &:next[top]; }"
+              "::window[top] == .box:first[top]"
+              ".box:last[bottom] == ::window[bottom]"
+            ]
+          selectors: ['.box']
+        }
+
+  parse """
+          @v |
+             (#nav)
+             ~20~
+             (.box)
+               -[post-gap]-
+               ...
+             ~20~
+             (#footer)
+             |
+               in(::window);
+        """
+      ,
+        {
+          statements: [
+              "::window[top] == #nav[top]"
+              ".box { &[bottom] + [post-gap] == &:next[top]; }"
+              "#nav[bottom] + 20 <= .box:first[top]"
+              ".box:last[bottom] + 20 <= #footer[top]"
+              "#footer[bottom] == ::window[bottom]"
+            ]
+          selectors: ['#nav','.box','#footer']
+        }
+
+
 
 
 
