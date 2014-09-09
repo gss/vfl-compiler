@@ -371,11 +371,10 @@ ChainPredVal
 View "VFL Element"
   = Splat
   / ViewSelector
-  / "|" name:([^~\-] NameChars+) pred:Predicate? "|"
-    {return {view:p.stringify(name),preds:pred};}
   /  point:Point       {return {view:"|", isPoint:true, pos:point};}
   / "|"                                   {return {view:"|"};}
   // errorr
+  // "|" name:([^~\-] NameChars+) pred:Predicate? "|" {return {view:p.stringify(name),preds:pred};}
 
 ViewSelector
   = "(" _ view:NameChars+ _ pred:Predicate? _ ")"

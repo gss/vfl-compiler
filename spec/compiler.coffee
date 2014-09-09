@@ -140,12 +140,16 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
 
     parse """
-            @h (#b1)-#box1.class1[width]-(#b2)-"virtual"[-my-custom-prop]-(#b3); // explicit view var gaps
+            @v (#b1)
+                -#box1.class1[width]-
+               (#b2)
+                -"virtual"[-my-custom-prop]-
+               (#b3); // explicit view var gaps
           """
         ,
           [
-            "#b1[right] + #box1.class1[width] == #b2[left]"
-            """#b2[right] + "virtual"[-my-custom-prop] == #b3[left]"""
+            "#b1[bottom] + #box1.class1[width] == #b2[top]"
+            """#b2[bottom] + "virtual"[-my-custom-prop] == #b3[top]"""
           ]
 
     parse """
@@ -249,12 +253,17 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
 
     parse """
-            @h |-|#sub|-| in(#parent) gap(100); // super view with explicit standard gaps
+            @v |
+                -
+               (#sub)
+                -
+               |
+                in(#parent) gap(100); // super view with explicit standard gaps
           """
         ,
           [
-            '#parent[left] + 100 == #sub[left]'
-            '#sub[right] + 100 == #parent[right]'
+            '#parent[top] + 100 == #sub[top]'
+            '#sub[bottom] + 100 == #parent[bottom]'
           ]
 
     parse """
