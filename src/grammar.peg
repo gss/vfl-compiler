@@ -378,7 +378,20 @@ View "VFL Element"
 
 ViewSelector
   = "(" _ view:NameChars+ _ pred:Predicate? _ ")"
-    {view = p.stringify(view); p.addSelector(view); return {view:view,preds:pred};}
+    {
+      view = p.stringify(view); 
+      p.addSelector(view); 
+      return {view:view,preds:pred};
+    }
+  / ComplexViewSelector
+
+ComplexViewSelector
+  = "(" _ view:[^()]* _ pred:Predicate? _ ")"
+    {
+      view = "(" + p.stringify(view) + ")"; 
+      p.addSelector(view); 
+      return {view:view,preds:pred};
+    }
 
 Splat
   = o:ViewSelector __ connection:Connection? __ "..."
