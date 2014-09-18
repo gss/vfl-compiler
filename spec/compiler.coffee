@@ -686,6 +686,19 @@ describe 'VFL-to-CCSS Compiler', ->
   # Splats + other layout items
   # -----------------------------
 
+  parse """ // :first & :last injection w/ parans
+          @h (& .nav) (& .box)... (& .aside)
+        """
+      ,
+        {
+          statements: [
+              "(& .box) { &[right] == &:next[left]; }"
+              "(& .nav)[right] == ((& .box):first)[left]"
+              "((& .box):last)[right] == (& .aside)[left]"
+            ]
+          selectors: ['(& .nav)','(& .box)','(& .aside)']
+        }
+  
   parse """
           @h (#nav) (.box)... (#aside)
         """

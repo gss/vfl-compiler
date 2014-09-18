@@ -136,20 +136,24 @@
   };
 
   p.getLeftVar = function (view, dimension, o, viewObj) {
-    var varName, viewName;
+    var varName;
     if (viewObj.isPoint) {
       return viewObj.pos;
     }
     else if (view === "|") {
-      viewName = getSuperViewName(o);
+      view = getSuperViewName(o);
       varName = superLeftVarNames[dimension];
     }
     else {
-      viewName = view;
-      if (viewObj.isSplat) {viewName += ":last"}
+      if (viewObj.isSplat) {
+        view += ":last";
+        if (view[0] === "(") {
+          view = "(" + view + ")";
+        }
+      }
       varName = leftVarNames[dimension];
     }
-    return viewName + "[" + varName + "]";
+    return view + "[" + varName + "]";
   };
 
   p.getRightVar = function (view, dimension, o, viewObj) {
@@ -162,7 +166,12 @@
       varName = superRightVarNames[dimension];
     }
     else {
-      if (viewObj.isSplat) {view += ":first"}
+      if (viewObj.isSplat) {
+        view += ":first";
+        if (view[0] === "(") {
+          view = "(" + view + ")";
+        }
+      }
       varName = rightVarNames[dimension];
     }
     return view + "[" + varName + "]";
