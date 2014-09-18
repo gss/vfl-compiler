@@ -192,17 +192,6 @@ describe 'VFL-to-CCSS Compiler', ->
             '"a"[bottom] + [vgap] == "q-1"[top]'
             '"q-1"[bottom] + [vgap] == "_fallout"[top]'
           ]
-    
-    parse """
-            @v (& "Zone")-(#box "1")-(.class"a")-(&.class"q-1")-(& > .class .class2"_fallout"); // virtuals
-          """
-        ,
-          [
-            '(& "Zone")[bottom] + [vgap] == (#box "1")[top]'
-            '(#box "1")[bottom] + [vgap] == .class"a"[top]'
-            '.class"a"[bottom] + [vgap] == &.class"q-1"[top]'
-            '&.class"q-1"[bottom] + [vgap] == (& > .class .class2"_fallout")[top]'
-          ]
 
     expectError '@h (#b1(#b2);'
 
@@ -799,3 +788,32 @@ describe 'VFL-to-CCSS Compiler', ->
               ]
             selectors: ['&']
           }
+    
+    parse """ // complex selectors
+            @v (& "Zone")-(#box "1")-(.class"a")-(&.class"q-1")-(& > .class .class2"_fallout"); 
+          """
+        ,
+          {
+            statements: [
+                '(& "Zone")[bottom] + [vgap] == (#box "1")[top]'
+                '(#box "1")[bottom] + [vgap] == .class"a"[top]'
+                '.class"a"[bottom] + [vgap] == &.class"q-1"[top]'
+                '&.class"q-1"[bottom] + [vgap] == (& > .class .class2"_fallout")[top]'
+              ]
+            selectors: ['(& "Zone")', '(#box "1")', '.class"a"', '&.class"q-1"', '(& > .class .class2"_fallout")']
+          }
+    
+    parse """
+            @v | (&:next .featured article .title"zone") | in(& > .class .class2"_fallout")
+          """
+        ,
+          {
+            statements: [
+                '(& > .class .class2"_fallout")[top] == (&:next .featured article .title"zone")[top]'
+                '(&:next .featured article .title"zone")[bottom] == (& > .class .class2"_fallout")[bottom]'
+              ]
+            selectors: [
+                '(&:next .featured article .title"zone")'
+              ]
+          }
+          

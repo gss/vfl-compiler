@@ -330,11 +330,26 @@ Options
 
 Option 'Option'
   = __ chain:Chain { return chain; }
-  / __ key:NameChars+ "(" value:OpionValueChars+ ")" {return {key:key.join(''), value:value.join('')};}
+  / __ "in" "(" simple:[^) ]+ ")" 
+    {
+      return {key:"in", value:simple.join('')};
+    }
+  / __ "in" "(" complex:[^)]+ ")" 
+    {
+      return {key:"in", value:"(" + complex.join('') + ")"};
+    }
+  / __ key:NameChars+ "(" value:OpionValueChars+ ")" 
+    {
+      return {key:key.join(''), value:value.join('')};
+    }
   / __ sw:StrengthAndWeight {return {key:"sw",value:sw}; }
 
 OpionValueChars
   = [^>=<!)]
+  / [>=<!]
+    {
+      throw new SyntaxError('invalid character in option', null, null, null, line(), column());
+    }
 
 Chain 'Chain'
   = "chain-" prop:NameChars+ preds:ChainPredicate? { return {'chain':[prop.join(""),preds]};}
