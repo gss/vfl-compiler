@@ -357,17 +357,7 @@ describe 'VFL-to-CCSS Compiler', ->
             '"col4"[right] + 8 == #btn2[left]'
           ]
     
-    parse """
-            @h (#btn1)-<&[-other-place]>
-                       < &[center-x] >-(#btn2)
-              gap(&[gap]);
-              // this scoped
-          """
-        ,
-          [
-            '#btn1[right] + &[gap] == &[-other-place]'
-            '&[center-x] + &[gap] == #btn2[left]'
-          ]
+  
           
     
     parse """
@@ -393,6 +383,24 @@ describe 'VFL-to-CCSS Compiler', ->
             '#btn1[right] + &[gap] == (.box .foo:bar:next .black)[center-x]'
             '(.box ! .foo:bar:next .black)[left] + &[gap] == #btn2[left]'
           ]
+    
+    parse """
+            @h | - (#btn1) - <&[right]>
+                       < &[right] > - (#btn2) - |
+              gap(&[gap])
+              outer-gap(&[outer-gap])
+              in(&);
+              // this scoped
+          """
+        ,
+          [
+            '&[left] + &[outer-gap] == #btn1[left]'
+            '#btn1[right] + &[gap] == &[right]'
+            '&[right] + &[gap] == #btn2[left]'
+            '#btn2[right] + &[outer-gap] == &[right]'
+          ]
+    
+    
 
 
 
