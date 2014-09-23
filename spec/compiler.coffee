@@ -356,6 +356,43 @@ describe 'VFL-to-CCSS Compiler', ->
             '#btn1[right] + 8 == "col3"[left]'
             '"col4"[right] + 8 == #btn2[left]'
           ]
+    
+    parse """
+            @h (#btn1)-<&[-other-place]>
+                       < &[center-x] >-(#btn2)
+              gap(&[gap]);
+              // this scoped
+          """
+        ,
+          [
+            '#btn1[right] + &[gap] == &[-other-place]'
+            '&[center-x] + &[gap] == #btn2[left]'
+          ]
+          
+    
+    parse """
+            @h (#btn1)-<&[-other-place]>
+                       < &[center-x] >-(#btn2)
+              gap(&[gap]);
+              // this scoped
+          """
+        ,
+          [
+            '#btn1[right] + &[gap] == &[-other-place]'
+            '&[center-x] + &[gap] == #btn2[left]'
+          ]
+    
+    parse """
+            @h (#btn1)-< (.box .foo:bar:next .black)[center-x] >
+                       < (.box ! .foo:bar:next .black)[left] >-(#btn2)
+              gap(&[gap]);
+              // complex selectors
+          """
+        ,
+          [
+            '#btn1[right] + &[gap] == (.box .foo:bar:next .black)[center-x]'
+            '(.box ! .foo:bar:next .black)[left] + &[gap] == #btn2[left]'
+          ]
 
 
 
