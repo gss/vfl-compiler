@@ -874,4 +874,20 @@ describe 'VFL-to-CCSS Compiler', ->
                 '(&:next .featured article .title"zone")'
               ]
           }
+    
+    parse """ // comma seperated scoped zones
+            @v |(&"zone2", &"zone1")| in(&)
+          """
+        ,
+          {
+            statements: [
+                '&[top] == (&"zone2", &"zone1")[top]'
+                '(&"zone2", &"zone1")[bottom] == &[bottom]'
+              ]
+            selectors: [
+                '(&"zone2", &"zone1")'
+              ]
+          }
+          
+          
           
