@@ -1,4 +1,4 @@
-VFL to CCSS Compiler [![Build Status](https://travis-ci.org/the-gss/vfl-compiler.png?branch=master)](https://travis-ci.org/the-gss/vfl-compiler)
+VFL to CCSS Compiler [![Build Status](https://travis-ci.org/gss/vfl-compiler.png?branch=master)](https://travis-ci.org/gss/vfl-compiler)
 =============
 
 This library compiles [GSS-flavored VFL](http://gridstylesheets.org/guides/vfl/) statements into [GSS-flavored CCSS](http://gridstylesheets.org/guides/ccss/) statements.
