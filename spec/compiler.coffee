@@ -195,6 +195,12 @@ describe 'VFL-to-CCSS Compiler', ->
 
     expectError '@h (#b1(#b2);'
 
+
+    # Variable scope
+    # --------------------------------------------------
+
+    # Global
+
     parse """
             @h (#b1)-$[md]-(#b2)
           """
@@ -210,6 +216,11 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             "#b1[right] + $md == #b2[left]"
           ]
+
+    expectError '@h (#b1)-$$md-(#b2)'
+
+
+    # Parent
 
     parse """
             @h (#b1)-^[md]-(#b2)
@@ -228,6 +239,17 @@ describe 'VFL-to-CCSS Compiler', ->
           ]
 
     parse """
+            @h (#b1)-^^md-(#b2)
+          """
+        ,
+          [
+            "#b1[right] + ^^md == #b2[left]"
+          ]
+
+
+    #  Local
+
+    parse """
             @h (#b1)-&[md]-(#b2)
           """
         ,
@@ -242,6 +264,8 @@ describe 'VFL-to-CCSS Compiler', ->
           [
             "#b1[right] + &md == #b2[left]"
           ]
+
+    expectError '@h (#b1)-&&md-(#b2)'
 
 
 
@@ -404,10 +428,10 @@ describe 'VFL-to-CCSS Compiler', ->
             '#btn1[right] + 8 == "col3"[left]'
             '"col4"[right] + 8 == #btn2[left]'
           ]
-    
-  
-          
-    
+
+
+
+
     parse """
             @h (#btn1)-<&[-other-place]>
                        < &[center-x] >-(#btn2)
@@ -419,7 +443,7 @@ describe 'VFL-to-CCSS Compiler', ->
             '#btn1[right] + &[gap] == &[-other-place]'
             '&[center-x] + &[gap] == #btn2[left]'
           ]
-    
+
     parse """
             @h (#btn1)-< (.box .foo:bar:next .black)[center-x] >
                        < (.box ! .foo:bar:next .black)[left] >-(#btn2)
@@ -431,7 +455,7 @@ describe 'VFL-to-CCSS Compiler', ->
             '#btn1[right] + &[gap] == (.box .foo:bar:next .black)[center-x]'
             '(.box ! .foo:bar:next .black)[left] + &[gap] == #btn2[left]'
           ]
-    
+
     parse """
             @h | - (#btn1) - <&[right]>
                        < &[right] > - (#btn2) - |
@@ -447,8 +471,8 @@ describe 'VFL-to-CCSS Compiler', ->
             '&[right] + &[gap] == #btn2[left]'
             '#btn2[right] + &[outer-gap] == &[right]'
           ]
-    
-    
+
+
 
 
 
@@ -791,7 +815,7 @@ describe 'VFL-to-CCSS Compiler', ->
             ]
           selectors: ['(& .nav)','(& .box)','(& .aside)']
         }
-  
+
   parse """
           @h (#nav) (.box)... (#aside)
         """
@@ -894,9 +918,9 @@ describe 'VFL-to-CCSS Compiler', ->
               ]
             selectors: ['&']
           }
-    
+
     parse """ // complex selectors
-            @v (& "Zone")-(#box "1")-(.class"a")-(&.class"q-1")-(& > .class .class2"_fallout"); 
+            @v (& "Zone")-(#box "1")-(.class"a")-(&.class"q-1")-(& > .class .class2"_fallout");
           """
         ,
           {
@@ -908,7 +932,7 @@ describe 'VFL-to-CCSS Compiler', ->
               ]
             selectors: ['(& "Zone")', '(#box "1")', '.class"a"', '&.class"q-1"', '(& > .class .class2"_fallout")']
           }
-    
+
     parse """
             @v | (&:next .featured article .title"zone") | in(& > .class .class2"_fallout")
           """
@@ -922,7 +946,7 @@ describe 'VFL-to-CCSS Compiler', ->
                 '(&:next .featured article .title"zone")'
               ]
           }
-    
+
     parse """ // comma seperated scoped zones
             @v |(&"zone2", &"zone1")| in(&)
           """
@@ -936,6 +960,3 @@ describe 'VFL-to-CCSS Compiler', ->
                 '(&"zone2", &"zone1")'
               ]
           }
-          
-          
-          
