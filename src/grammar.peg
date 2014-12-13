@@ -464,7 +464,7 @@ Connection "VFL Connection"
   / ""                     {return {op:"=="};}
 
 ExplicitGap "VFL Connection Gap"
-  = gap:[a-zA-Z0-9_$\^&]+ {return gap.join("");}
+  = scope:[$\^&]* gap:[a-zA-Z0-9_]+ {return scope.concat(gap).join("");}
   / gap:[^\[]* "[" varr:[^\]]+ "]" {return gap.join("") + "[" + varr.join("") + "]";}
 
 
