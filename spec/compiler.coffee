@@ -195,6 +195,54 @@ describe 'VFL-to-CCSS Compiler', ->
 
     expectError '@h (#b1(#b2);'
 
+    parse """
+            @h (#b1)-$[md]-(#b2)
+          """
+        ,
+          [
+            "#b1[right] + $[md] == #b2[left]"
+          ]
+
+    parse """
+            @h (#b1)-$md-(#b2)
+          """
+        ,
+          [
+            "#b1[right] + $md == #b2[left]"
+          ]
+
+    parse """
+            @h (#b1)-^[md]-(#b2)
+          """
+        ,
+          [
+            "#b1[right] + ^[md] == #b2[left]"
+          ]
+
+    parse """
+            @h (#b1)-^md-(#b2)
+          """
+        ,
+          [
+            "#b1[right] + ^md == #b2[left]"
+          ]
+
+    parse """
+            @h (#b1)-&[md]-(#b2)
+          """
+        ,
+          [
+            "#b1[right] + &[md] == #b2[left]"
+          ]
+
+    parse """
+            @h (#b1)-&md-(#b2)
+          """
+        ,
+          [
+            "#b1[right] + &md == #b2[left]"
+          ]
+
 
 
 
