@@ -463,8 +463,24 @@ Connection "VFL Connection"
   / "~"                    {return {op:"<="};}
   / ""                     {return {op:"=="};}
 
+Scope
+  = local:"&"+ {
+    if (local.length > 1) {
+      throw new SyntaxError('Invalid local variable scope', null, null, null, line(), column());
+    }
+    return local.join("");
+  }
+  / parent:"^"+ {return parent.join("");}
+  / global:"$"+ {
+    if (global.length > 1) {
+      throw new SyntaxError('Invalid global variable scope', null, null, null, line(), column());
+    }
+    return global.join("");
+  }
+
 ExplicitGap "VFL Connection Gap"
-  = gap:[a-zA-Z0-9_$]+ {return gap.join("");}
+  = scope:Scope gap:[a-zA-Z0-9_]+ {return scope + gap.join("");}
+  / gap:[a-zA-Z0-9_]+ {return gap.join("");}
   / gap:[^\[]* "[" varr:[^\]]+ "]" {return gap.join("") + "[" + varr.join("") + "]";}
 
 
