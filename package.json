@@ -13,7 +13,6 @@
     }
   ],
   "dependencies": {
-    "ccss-compiler": "*",
     "error-reporter": "~0.1.0"
   },
   "devDependencies": {
